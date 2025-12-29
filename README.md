@@ -38,7 +38,7 @@ sudo make install
 
 ## 2. Installation (The GUI)
 
-This one-step script detects your OS (Ubuntu, Fedora, Arch), installs Python dependencies, and sets up the app.
+This one-step script installs Python dependencies, and sets up the app.
 
 ```bash
 git clone https://github.com/Maxnights/simple-linux-wallpaperengine-gui.git
