@@ -18,6 +18,8 @@
     "disable_mouse_checkbox": "Désactiver l'interaction de la souris (--disable-mouse)",
     "disable_parallax_checkbox": "Désactiver l'effet de parallaxe (--disable-parallax)",
     "no_fullscreen_pause_checkbox": "Ne pas mettre en pause en plein écran (--no-fullscreen-pause)",
+    "windowed_mode_checkbox": "Mode fenêtré (Correctif pour KDE/GNOME)",
+    "kwin_hint": "Note : Si la fenêtre du fond d'écran reste au-dessus, vous devrez peut-être créer une règle KWin (Alt+F3 -> Plus d'actions -> Configurer les paramètres spéciaux de la fenêtre) pour la forcer à 'Rester en dessous' (Keep Below).",
     "adv_frame": "Avancé",
     "set_property_label": "Définir les propriétés (--set-property):",
     "set_property_example": "Exemple: nom=valeur nom2=valeur2",

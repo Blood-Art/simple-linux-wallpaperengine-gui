@@ -18,6 +18,8 @@
     "disable_mouse_checkbox": "Вимкнути взаємодію з мишею (--disable-mouse)",
     "disable_parallax_checkbox": "Вимкнути ефект паралакса (--disable-parallax)",
     "no_fullscreen_pause_checkbox": "Не призупиняти в повноекранному режимі (--no-fullscreen-pause)",
+    "windowed_mode_checkbox": "Віконний режим (Виправлення для KDE/GNOME)",
+    "kwin_hint": "Примітка: Якщо вікно шпалер знаходиться поверх інших вікон, вам може знадобитися створити правило KWin для цього вікна (Alt+F3 -> Інші дії -> Налаштувати особливі параметри вікна), щоб воно завжди було «На задньому плані» (Keep Below).",
     "adv_frame": "Додатково",
     "set_property_label": "Встановити властивості (--set-property):",
     "set_property_example": "Приклад: name=value name2=value2",
