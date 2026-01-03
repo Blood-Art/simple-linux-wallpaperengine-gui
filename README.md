@@ -4,7 +4,7 @@ A modern, universal GUI for [linux-wallpaperengine](https://github.com/Almamu/li
 
 ## Screenshots
 <p align="center">
-  <img src="screenshots/screenshot-2025-12-21_17-56-09.png" width="45%" />
+  <img width="2560" height="1440" alt="Pasted image" src="https://github.com/user-attachments/assets/b2c28e96-53d7-4b95-951f-d17418326ded" />
   <img src="screenshots/screenshot-2025-12-21_17-56-23.png" width="45%" />
 </p>
 <p align="center">
@@ -63,3 +63,6 @@ Ensure you completed Step 1. Run `linux-wallpaperengine --help` in a terminal to
 
 **Wallpapers not showing?**  
 Go to the **Library** tab and click **Scan Local Wallpapers**. The app searches standard paths including `~/.local/share/Steam`, `~/.var/app/com.valvesoftware.Steam`, and `~/snap/steam`.
+
+
+
