@@ -27,6 +27,7 @@ QLabel.CardTitle { font-weight: 600; font-size: 15px; color: #FFFFFF; margin-bot
 QLineEdit, QComboBox { background-color: #1E1E1E; border: 1px solid #3A3A3A; border-radius: 6px; padding: 4px 8px; color: #FFFFFF; selection-background-color: #0A84FF; min-height: 22px; }
 QLineEdit:focus, QComboBox:focus { border: 1px solid #0A84FF; }
 QComboBox::drop-down { border: none; }
+QComboBox QAbstractItemView { background-color: #1E1E1E; border: 1px solid #3A3A3A; selection-background-color: #0A84FF; selection-color: #FFFFFF; color: #FFFFFF; outline: none; }
 QPushButton { background-color: #0A84FF; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 500; font-size: 13px; min-height: 20px; }
 QPushButton:hover { background-color: #007AFF; }
 QPushButton:pressed { background-color: #0062CC; }
@@ -57,6 +58,7 @@ QLabel.CardTitle { font-weight: 600; font-size: 15px; color: #000000; margin-bot
 QLineEdit, QComboBox { background-color: #FFFFFF; border: 1px solid #D1D1D6; border-radius: 6px; padding: 4px 8px; color: #000000; selection-background-color: #007AFF; min-height: 22px; }
 QLineEdit:focus, QComboBox:focus { border: 1px solid #007AFF; }
 QComboBox::drop-down { border: none; }
+QComboBox QAbstractItemView { background-color: #FFFFFF; border: 1px solid #D1D1D6; selection-background-color: #007AFF; selection-color: #FFFFFF; color: #000000; outline: none; }
 QPushButton { background-color: #007AFF; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 500; font-size: 13px; min-height: 20px; }
 QPushButton:hover { background-color: #0062CC; }
 QPushButton:pressed { background-color: #0051A8; }
@@ -73,6 +75,68 @@ QListWidget#WallpaperList { background-color: #FFFFFF; border: 1px solid #E5E5E5
 QListWidget#WallpaperList::item { padding: 8px; border-bottom: 1px solid #F2F2F7; color: #000000; }
 QListWidget#WallpaperList::item:selected { background-color: #007AFF; color: white; border-radius: 4px; }
 QLabel#PreviewBox { background-color: #F2F2F7; border: 1px solid #E5E5E5; border-radius: 16px; color: #999999; }
+"""
+
+THEME_PURPLE = """
+QMainWindow { background-color: #2D2436; }
+QWidget { color: #F3E5F5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, sans-serif; font-size: 13px; }
+QListWidget#Sidebar { background-color: #382C46; border: none; outline: none; font-size: 13px; font-weight: 500; }
+QListWidget#Sidebar::item { height: 32px; padding-left: 10px; margin: 2px 10px; border-radius: 6px; color: #B39DDB; }
+QListWidget#Sidebar::item:selected { background-color: #512DA8; color: #FFFFFF; }
+QListWidget#Sidebar::item:hover:!selected { background-color: #4A3B5C; color: #FFFFFF; }
+QFrame.Card { background-color: #3F3350; border: 1px solid #512DA8; border-radius: 10px; }
+QLabel.CardTitle { font-weight: 600; font-size: 15px; color: #E1BEE7; margin-bottom: 8px; }
+QLineEdit, QComboBox { background-color: #2D2436; border: 1px solid #512DA8; border-radius: 6px; padding: 4px 8px; color: #FFFFFF; selection-background-color: #7B1FA2; min-height: 22px; }
+QLineEdit:focus, QComboBox:focus { border: 1px solid #D500F9; }
+QComboBox::drop-down { border: none; }
+QComboBox QAbstractItemView { background-color: #2D2436; border: 1px solid #512DA8; selection-background-color: #7B1FA2; selection-color: #FFFFFF; color: #FFFFFF; outline: none; }
+QPushButton { background-color: #7B1FA2; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 500; font-size: 13px; min-height: 20px; }
+QPushButton:hover { background-color: #8E24AA; }
+QPushButton:pressed { background-color: #4A148C; }
+QPushButton#SecondaryButton { background-color: #4A3B5C; border: 1px solid #512DA8; color: #FFFFFF; }
+QPushButton#SecondaryButton:hover { background-color: #5C4A72; }
+QPushButton#DangerButton { background-color: #C62828; }
+QPushButton#DangerButton:hover { background-color: #B71C1C; }
+QCheckBox { spacing: 8px; color: #F3E5F5; }
+QCheckBox::indicator { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #7B1FA2; background: #3F3350; }
+QCheckBox::indicator:checked { background: #9C27B0; border-color: #9C27B0; }
+QSlider::groove:horizontal { border: 1px solid #512DA8; height: 4px; background: #3F3350; margin: 2px 0; border-radius: 2px; }
+QSlider::handle:horizontal { background: #E1BEE7; border: 1px solid #7B1FA2; width: 18px; height: 18px; margin: -8px 0; border-radius: 9px; }
+QListWidget#WallpaperList { background-color: #2D2436; border: 1px solid #512DA8; border-radius: 8px; outline: none; }
+QListWidget#WallpaperList::item { padding: 8px; border-bottom: 1px solid #4A3B5C; color: #F3E5F5; }
+QListWidget#WallpaperList::item:selected { background-color: #7B1FA2; color: white; border-radius: 4px; }
+QLabel#PreviewBox { background-color: #2D2436; border: 1px solid #512DA8; border-radius: 16px; color: #B39DDB; }
+"""
+
+THEME_DARK_BLUE = """
+QMainWindow { background-color: #0D1117; }
+QWidget { color: #C9D1D9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, sans-serif; font-size: 13px; }
+QListWidget#Sidebar { background-color: #161B22; border: none; outline: none; font-size: 13px; font-weight: 500; }
+QListWidget#Sidebar::item { height: 32px; padding-left: 10px; margin: 2px 10px; border-radius: 6px; color: #8B949E; }
+QListWidget#Sidebar::item:selected { background-color: #1F6FEB; color: #FFFFFF; }
+QListWidget#Sidebar::item:hover:!selected { background-color: #21262D; color: #FFFFFF; }
+QFrame.Card { background-color: #161B22; border: 1px solid #30363D; border-radius: 10px; }
+QLabel.CardTitle { font-weight: 600; font-size: 15px; color: #58A6FF; margin-bottom: 8px; }
+QLineEdit, QComboBox { background-color: #0D1117; border: 1px solid #30363D; border-radius: 6px; padding: 4px 8px; color: #C9D1D9; selection-background-color: #1F6FEB; min-height: 22px; }
+QLineEdit:focus, QComboBox:focus { border: 1px solid #58A6FF; }
+QComboBox::drop-down { border: none; }
+QComboBox QAbstractItemView { background-color: #0D1117; border: 1px solid #30363D; selection-background-color: #1F6FEB; selection-color: #FFFFFF; color: #C9D1D9; outline: none; }
+QPushButton { background-color: #238636; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 500; font-size: 13px; min-height: 20px; }
+QPushButton:hover { background-color: #2EA043; }
+QPushButton:pressed { background-color: #238636; }
+QPushButton#SecondaryButton { background-color: #21262D; border: 1px solid #30363D; color: #C9D1D9; }
+QPushButton#SecondaryButton:hover { background-color: #30363D; }
+QPushButton#DangerButton { background-color: #DA3633; }
+QPushButton#DangerButton:hover { background-color: #B62324; }
+QCheckBox { spacing: 8px; color: #C9D1D9; }
+QCheckBox::indicator { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #30363D; background: #0D1117; }
+QCheckBox::indicator:checked { background: #1F6FEB; border-color: #1F6FEB; }
+QSlider::groove:horizontal { border: 1px solid #30363D; height: 4px; background: #21262D; margin: 2px 0; border-radius: 2px; }
+QSlider::handle:horizontal { background: #58A6FF; border: 1px solid #1F6FEB; width: 18px; height: 18px; margin: -8px 0; border-radius: 9px; }
+QListWidget#WallpaperList { background-color: #0D1117; border: 1px solid #30363D; border-radius: 8px; outline: none; }
+QListWidget#WallpaperList::item { padding: 8px; border-bottom: 1px solid #21262D; color: #C9D1D9; }
+QListWidget#WallpaperList::item:selected { background-color: #1F6FEB; color: white; border-radius: 4px; }
+QLabel#PreviewBox { background-color: #0D1117; border: 1px solid #30363D; border-radius: 16px; color: #8B949E; }
 """
 
 class Worker(QObject):
@@ -110,6 +174,7 @@ class WallpaperApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.i18n = I18n()
+        self.translatable_labels = []
         self.load_config_data()
         self.i18n.load(self.config.get("current_language", "en"))
         self._ = self.i18n.get
@@ -122,9 +187,8 @@ class WallpaperApp(QMainWindow):
         self.screens = self.detect_screens()
         for s in self.screens:
             self.screen_combo.addItem(s["name"], s)
-        if self.config.get("auto_restore", False):
-            QTimer.singleShot(1000, self.restore_last_wallpaper)
         self.update_texts()
+        QTimer.singleShot(500, self.restore_last_wallpaper)
 
     def setup_ui(self):
         main_widget = QWidget()
@@ -168,14 +232,18 @@ class WallpaperApp(QMainWindow):
         layout.addLayout(h_layout)
         card_audio = self.create_card(h_layout, "audio_frame")
         self.chk_silent = QCheckBox("silent_checkbox")
+        self.chk_silent.clicked.connect(self.run_wallpaper)
         self.slider_volume = QSlider(Qt.Orientation.Horizontal)
         self.slider_volume.setRange(0, 100)
         self.slider_volume.setValue(15)
+        self.slider_volume.sliderReleased.connect(self.run_wallpaper)
         self.chk_no_automute = QCheckBox("no_automute_checkbox")
+        self.chk_no_automute.clicked.connect(self.run_wallpaper)
         self.chk_no_proc = QCheckBox("no_audio_processing_checkbox")
+        self.chk_no_proc.clicked.connect(self.run_wallpaper)
         l = card_audio.layout()
         l.addWidget(self.chk_silent)
-        l.addWidget(QLabel("volume_label"))
+        l.addWidget(self.create_label("volume_label"))
         l.addWidget(self.slider_volume)
         l.addWidget(self.chk_no_automute)
         l.addWidget(self.chk_no_proc)
@@ -183,11 +251,15 @@ class WallpaperApp(QMainWindow):
         self.slider_fps = QSlider(Qt.Orientation.Horizontal)
         self.slider_fps.setRange(10, 144)
         self.slider_fps.setValue(30)
+        self.slider_fps.sliderReleased.connect(self.run_wallpaper)
         self.chk_mouse = QCheckBox("disable_mouse_checkbox")
+        self.chk_mouse.clicked.connect(self.run_wallpaper)
         self.chk_parallax = QCheckBox("disable_parallax_checkbox")
+        self.chk_parallax.clicked.connect(self.run_wallpaper)
         self.chk_fs_pause = QCheckBox("no_fullscreen_pause_checkbox")
+        self.chk_fs_pause.clicked.connect(self.run_wallpaper)
         l = card_perf.layout()
-        l.addWidget(QLabel("fps_label"))
+        l.addWidget(self.create_label("fps_label"))
         l.addWidget(self.slider_fps)
         l.addWidget(self.chk_mouse)
         l.addWidget(self.chk_parallax)
@@ -195,9 +267,12 @@ class WallpaperApp(QMainWindow):
         card_adv = self.create_card(layout, "adv_frame")
         self.combo_scaling = QComboBox()
         self.combo_scaling.addItems(['default', 'stretch', 'fit', 'fill'])
+        self.combo_scaling.currentTextChanged.connect(self.run_wallpaper)
         self.combo_clamp = QComboBox()
         self.combo_clamp.addItems(['clamp', 'border', 'repeat'])
+        self.combo_clamp.currentTextChanged.connect(self.run_wallpaper)
         self.chk_windowed_mode = QCheckBox("windowed_mode_checkbox")
+        self.chk_windowed_mode.clicked.connect(self.run_wallpaper)
         self.input_props = QLineEdit()
         self.input_custom_args = QLineEdit()
         self.input_custom_args.setPlaceholderText("--window 0x0x1280x720")
@@ -226,14 +301,8 @@ class WallpaperApp(QMainWindow):
         self.btn_stop.clicked.connect(self.stop_wallpapers)
         self.btn_stop.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_stop.setMinimumHeight(32)
-        self.btn_restore = QPushButton("restore_last_button")
-        self.btn_restore.setObjectName("SecondaryButton")
-        self.btn_restore.clicked.connect(self.restore_last_wallpaper)
-        self.btn_restore.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_restore.setMinimumHeight(32)
         btn_layout.addWidget(self.btn_set)
         btn_layout.addWidget(self.btn_stop)
-        btn_layout.addWidget(self.btn_restore)
         layout.addStretch()
 
     def setup_library_page(self):
@@ -277,20 +346,19 @@ class WallpaperApp(QMainWindow):
         self.combo_lang.currentTextChanged.connect(self.change_lang)
         self.add_form_row(card, "language_label", self.combo_lang)
         self.combo_theme = QComboBox()
-        self.combo_theme.addItems(["Dark", "Light"])
+        self.combo_theme.addItems(["Dark", "Light", "Purple", "Dark Blue"])
         self.combo_theme.currentTextChanged.connect(self.change_theme)
         row_theme = QHBoxLayout()
         lbl_theme = QLabel("Theme")
         row_theme.addWidget(lbl_theme)
         row_theme.addWidget(self.combo_theme)
         card.layout().addLayout(row_theme)
-        self.chk_auto_restore = QCheckBox("auto_restore_checkbox")
-        self.chk_auto_restore.clicked.connect(self.save_config)
-        self.chk_stop_exit = QCheckBox("stop_on_exit_checkbox")
-        self.chk_stop_exit.clicked.connect(self.save_config)
-        card.layout().addWidget(self.chk_auto_restore)
-        card.layout().addWidget(self.chk_stop_exit)
         layout.addStretch()
+
+    def create_label(self, text_key):
+        lbl = QLabel(self._(text_key))
+        self.translatable_labels.append((lbl, text_key))
+        return lbl
 
     def create_card(self, parent_layout, title_key):
         frame = QFrame()
@@ -298,7 +366,7 @@ class WallpaperApp(QMainWindow):
         vbox = QVBoxLayout(frame)
         vbox.setContentsMargins(20, 20, 20, 20)
         vbox.setSpacing(12)
-        lbl = QLabel(title_key)
+        lbl = self.create_label(title_key)
         lbl.setProperty("class", "CardTitle")
         vbox.addWidget(lbl)
         parent_layout.addWidget(frame)
@@ -306,7 +374,7 @@ class WallpaperApp(QMainWindow):
 
     def add_form_row(self, card, label_key, widget):
         h = QHBoxLayout()
-        l = QLabel(label_key)
+        l = self.create_label(label_key)
         h.addWidget(l)
         h.addWidget(widget)
         card.layout().addLayout(h)
@@ -315,13 +383,23 @@ class WallpaperApp(QMainWindow):
         theme = self.config.get("theme", "Dark")
         if theme == "Dark":
             self.setStyleSheet(MACOS_DARK)
-        else:
+        elif theme == "Light":
             self.setStyleSheet(MACOS_LIGHT)
+        elif theme == "Purple":
+            self.setStyleSheet(THEME_PURPLE)
+        elif theme == "Dark Blue":
+            self.setStyleSheet(THEME_DARK_BLUE)
+        else:
+            self.setStyleSheet(MACOS_DARK)
 
     def update_texts(self):
         items = ["control_tab", "local_library_tab", "settings_tab"]
         for i, key in enumerate(items):
             self.sidebar.item(i).setText(self._(key))
+        
+        for widget, key in self.translatable_labels:
+            widget.setText(self._(key))
+
         self.combo_lang.blockSignals(True)
         self.combo_lang.clear()
         for code, name in self.i18n.available_languages.items():
@@ -334,7 +412,6 @@ class WallpaperApp(QMainWindow):
         self.btn_set.setText(self._("set_wallpaper_button"))
         self.btn_set_library.setText(self._("set_wallpaper_button"))
         self.btn_stop.setText(self._("stop_button"))
-        self.btn_restore.setText(self._("restore_last_button"))
         self.btn_scan.setText(self._("scan_local_wallpapers_button"))
         self.chk_silent.setText(self._("silent_checkbox"))
         self.chk_no_automute.setText(self._("no_automute_checkbox"))
@@ -344,8 +421,6 @@ class WallpaperApp(QMainWindow):
         self.chk_fs_pause.setText(self._("no_fullscreen_pause_checkbox"))
         self.chk_windowed_mode.setText(self._("windowed_mode_checkbox"))
         self.lbl_kwin_hint.setText(self._("kwin_hint"))
-        self.chk_auto_restore.setText(self._("auto_restore_checkbox"))
-        self.chk_stop_exit.setText(self._("stop_on_exit_checkbox"))
 
     def switch_page(self, row):
         self.stack.setCurrentIndex(row)
@@ -585,12 +660,9 @@ class WallpaperApp(QMainWindow):
             except: pass
     
     def apply_config_ui(self):
-        self.chk_auto_restore.setChecked(self.config.get("auto_restore", False))
-        self.chk_stop_exit.setChecked(self.config.get("stop_on_exit", False))
+        pass
 
     def save_config(self):
-        self.config["auto_restore"] = self.chk_auto_restore.isChecked()
-        self.config["stop_on_exit"] = self.chk_stop_exit.isChecked()
         self.config["last_wallpaper"] = {
             "background_id": self.wp_id_input.text(),
             "screen": self.screen_combo.currentText(),
@@ -634,8 +706,6 @@ class WallpaperApp(QMainWindow):
             self.quit_app()
 
     def quit_app(self):
-        if self.chk_stop_exit.isChecked():
-            self.stop_wallpapers()
         QApplication.quit()
 
 if __name__ == "__main__":
