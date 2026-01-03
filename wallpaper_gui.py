@@ -8,7 +8,8 @@ import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QLabel, QLineEdit, QCheckBox, QSlider, QComboBox, 
                              QStackedWidget, QListWidget, QListWidgetItem, QSystemTrayIcon, 
-                             QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect, QStyledItemDelegate, QStyle)
+                             QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect, QStyledItemDelegate, QStyle,
+                             QFileDialog)
 from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant
 from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter
 
@@ -88,15 +89,15 @@ class I18n:
 class WallpaperDelegate(QStyledItemDelegate):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.scales = {}  # Store target scales for each index
-        self.current_scales = {}  # Store current scales for animation
+        self.scales = {}
+        self.current_scales = {}
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_animations)
-        self.timer.start(16)  # ~60 FPS
+        self.timer.start(16)           
 
     def update_animations(self):
         changed = False
-        step = 0.02 # Speed of animation
+        step = 0.02                     
         for index_ptr, target in self.scales.items():
             curr = self.current_scales.get(index_ptr, 1.0)
             if abs(curr - target) > 0.001:
@@ -114,14 +115,14 @@ class WallpaperDelegate(QStyledItemDelegate):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
         
-        # Unique identifier for the index
+                                         
         idx_id = index.row()
         
-        # Update target scale based on hover
+                                            
         is_hovered = option.state & QStyle.StateFlag.State_MouseOver
         self.scales[idx_id] = 1.08 if is_hovered else 1.0
         
-        # Get current animated scale
+                                    
         scale = self.current_scales.get(idx_id, 1.0)
         
         if scale > 1.0:
@@ -129,7 +130,7 @@ class WallpaperDelegate(QStyledItemDelegate):
             painter.scale(scale, scale)
             painter.translate(-option.rect.center())
             
-            # Add a subtle shadow when hovered
+                                              
             if is_hovered:
                 shadow_color = QColor(0, 0, 0, 60)
                 painter.setPen(Qt.PenStyle.NoPen)
@@ -176,7 +177,7 @@ class WallpaperApp(QMainWindow):
         self.nav_bar = QListWidget()
         self.nav_bar.setObjectName("Sidebar")
         self.nav_bar.setFlow(QListWidget.Flow.LeftToRight)
-        self.nav_bar.setFixedWidth(260) # Fits two items comfortably
+        self.nav_bar.setFixedWidth(260)                             
         self.nav_bar.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.addItems(["Control", "Library"])
@@ -304,7 +305,12 @@ class WallpaperApp(QMainWindow):
         self.btn_scan.setMinimumHeight(36)
         self.btn_scan.setCursor(Qt.CursorShape.PointingHandCursor)
         header.addWidget(self.btn_scan)
-        
+        self.btn_select_folder = QPushButton("select_folder_button")
+        self.btn_select_folder.clicked.connect(self.manual_scan)
+        self.btn_select_folder.setMinimumHeight(36)
+        self.btn_select_folder.setObjectName("SecondaryButton")
+        self.btn_select_folder.setCursor(Qt.CursorShape.PointingHandCursor)
+        header.addWidget(self.btn_select_folder)
         self.btn_set_library = QPushButton("set_wallpaper_button")
         self.btn_set_library.clicked.connect(self.run_wallpaper)
         self.btn_set_library.setMinimumHeight(36)
@@ -312,7 +318,12 @@ class WallpaperApp(QMainWindow):
         self.btn_set_library.setCursor(Qt.CursorShape.PointingHandCursor)
         header.addWidget(self.btn_set_library)
         layout.addLayout(header)
-
+        search_layout = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(self._("search_placeholder"))
+        self.search_input.textChanged.connect(self.filter_wallpapers)
+        search_layout.addWidget(self.search_input)
+        layout.addLayout(search_layout)
         self.list_wallpapers = QListWidget()
         self.list_wallpapers.setObjectName("WallpaperGrid")
         self.list_wallpapers.setViewMode(QListWidget.ViewMode.IconMode)
@@ -372,6 +383,7 @@ class WallpaperApp(QMainWindow):
         self.btn_set_library.setText(self._("set_wallpaper_button"))
         self.btn_stop.setText(self._("stop_button"))
         self.btn_scan.setText(self._("scan_local_wallpapers_button"))
+        self.btn_select_folder.setText(self._("select_folder_button"))
         self.chk_silent.setText(self._("silent_checkbox"))
         self.chk_no_automute.setText(self._("no_automute_checkbox"))
         self.chk_no_proc.setText(self._("no_audio_processing_checkbox"))
@@ -380,6 +392,7 @@ class WallpaperApp(QMainWindow):
         self.chk_fs_pause.setText(self._("no_fullscreen_pause_checkbox"))
         self.chk_windowed_mode.setText(self._("windowed_mode_checkbox"))
         self.lbl_kwin_hint.setText(self._("kwin_hint"))
+        self.search_input.setPlaceholderText(self._("search_placeholder"))
 
     def switch_page(self, row):
         self.stack.setCurrentIndex(row)
@@ -394,6 +407,7 @@ class WallpaperApp(QMainWindow):
     def start_scan(self):
         self.status_bar.showMessage(self._("status_searching_local"))
         self.btn_scan.setEnabled(False)
+        self.search_input.clear()
         self.thread = QThread()
         self.worker = Worker(self.scan_logic)
         self.worker.moveToThread(self.thread)
@@ -404,76 +418,108 @@ class WallpaperApp(QMainWindow):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
-    def scan_logic(self):
+    def manual_scan(self):
+        directory = QFileDialog.getExistingDirectory(self, self._("select_folder_button"))
+        if directory:
+            self.status_bar.showMessage(self._("status_searching_local"))
+            self.btn_scan.setEnabled(False)
+            self.search_input.clear()
+            self.thread = QThread()
+            self.worker = Worker(self.scan_logic, manual_dir=directory)
+            self.worker.moveToThread(self.thread)
+            self.thread.started.connect(self.worker.run)
+            self.worker.finished.connect(self.scan_finished)
+            self.worker.finished.connect(self.thread.quit)
+            self.worker.finished.connect(self.worker.deleteLater)
+            self.thread.finished.connect(self.thread.deleteLater)
+            self.thread.start()
+
+    def scan_logic(self, manual_dir=None):
         workshop_dirs = set()
-        
-        # 1. Standard expected paths
-        base_paths = [
-            os.path.expanduser("~/.local/share/Steam"),
-            os.path.expanduser("~/.steam/steam"),
-            os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.local/share/Steam"),
-            os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.data/Steam"),
-            os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.steam/steam"),
-        ]
+        is_append = manual_dir is not None
+        if manual_dir:
+            workshop_dirs.add(manual_dir)
+        else:
+            base_paths = [
+                os.path.expanduser("~/.local/share/Steam"),
+                os.path.expanduser("~/.steam/steam"),
+                os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.local/share/Steam"),
+                os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.data/Steam"),
+                os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.steam/steam"),
+            ]
 
-        # 2. Find additional Steam libraries via libraryfolders.vdf
-        lib_configs = [
-            os.path.expanduser("~/.local/share/Steam/steamapps/libraryfolders.vdf"),
-            os.path.expanduser("~/.steam/steam/steamapps/libraryfolders.vdf"),
-            os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/libraryfolders.vdf")
-        ]
-        
-        for cfg in lib_configs:
-            if os.path.isfile(cfg):
+                                                                   
+            lib_configs = [
+                os.path.expanduser("~/.local/share/Steam/steamapps/libraryfolders.vdf"),
+                os.path.expanduser("~/.steam/steam/steamapps/libraryfolders.vdf"),
+                os.path.expanduser("~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/libraryfolders.vdf")
+            ]
+            
+            for cfg in lib_configs:
+                if os.path.isfile(cfg):
+                    try:
+                        with open(cfg, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                                                                            
+                            paths = re.findall(r'"path"\s+"([^"]+)"', content)
+                            for p in paths:
+                                if os.path.isdir(p):
+                                    base_paths.append(p)
+                    except: pass
+            
+                                  
+            base_paths = list(set(base_paths))
+            
+                                
+            base_paths.extend(glob.glob(os.path.expanduser("~/snap/steam/*/.local/share/Steam")))
+            base_paths.extend(glob.glob(os.path.expanduser("~/snap/steam/*/.steam/steam")))
+
+            for base in base_paths:
+                if not os.path.exists(base): continue
+                
+                                                     
+                p_workshop = os.path.join(base, "steamapps/workshop/content/431960")
+                if os.path.isdir(p_workshop):
+                    workshop_dirs.add(p_workshop)
+                
+                                                                         
+                p_presets = os.path.join(base, "steamapps/common/wallpaper_engine/assets/presets")
+                if os.path.isdir(p_presets):
+                    workshop_dirs.add(p_presets)
+
+                                                                       
+            if not workshop_dirs:
                 try:
-                    with open(cfg, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        # Extract paths like "path" "/mnt/data/SteamLibrary"
-                        paths = re.findall(r'"path"\s+"([^"]+)"', content)
-                        for p in paths:
-                            if os.path.isdir(p):
-                                base_paths.append(p)
-                except: pass
-        
-        # Unique and clean
-        base_paths = list(set(base_paths))
-        
-        # Dynamic Snap paths
-        base_paths.extend(glob.glob(os.path.expanduser("~/snap/steam/*/.local/share/Steam")))
-        base_paths.extend(glob.glob(os.path.expanduser("~/snap/steam/*/.steam/steam")))
-
-        for base in base_paths:
-            if not os.path.exists(base): continue
-            
-            # Check for Workshop Content (431960)
-            p_workshop = os.path.join(base, "steamapps/workshop/content/431960")
-            if os.path.isdir(p_workshop):
-                workshop_dirs.add(p_workshop)
-            
-            # Check for Default Presets (wallpaper_engine/assets/presets)
-            p_presets = os.path.join(base, "steamapps/common/wallpaper_engine/assets/presets")
-            if os.path.isdir(p_presets):
-                workshop_dirs.add(p_presets)
-
-        # 2. Global search fallback (limited depth to avoid long scans)
-        if not workshop_dirs:
-            try:
-                # Find "431960" directory in common locations if quick check failed
-                search_roots = [os.path.expanduser("~")]
-                cmd = ["find"] + search_roots + ["-maxdepth", "6", "-type", "d", "-name", "431960"]
-                result = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.DEVNULL)
-                if result.returncode == 0:
-                    for line in result.stdout.splitlines():
-                        if os.path.isdir(line):
-                            workshop_dirs.add(line)
-            except Exception as e:
-                print(f"Deep scan error: {e}")
+                                                                                   
+                    search_roots = [os.path.expanduser("~")]
+                    cmd = ["find"] + search_roots + ["-maxdepth", "6", "-type", "d", "-name", "431960"]
+                    result = subprocess.run(cmd, capture_output=True, text=True, stderr=subprocess.DEVNULL)
+                    if result.returncode == 0:
+                        for line in result.stdout.splitlines():
+                            if os.path.isdir(line):
+                                workshop_dirs.add(line)
+                except Exception as e:
+                    print(f"Deep scan error: {e}")
 
         wallpapers = []
         seen = set()
         
         for w_dir in workshop_dirs:
             try:
+                proj_self = os.path.join(w_dir, "project.json")
+                if os.path.isfile(proj_self):
+                    try:
+                        with open(proj_self, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            item_id = os.path.basename(w_dir)
+                            wallpapers.append({
+                                "title": data.get("title", "Untitled"),
+                                "id": item_id, 
+                                "path": w_dir,
+                                "preview": data.get("preview")
+                            })
+                            seen.add(item_id)
+                    except: pass
                 for item_id in os.listdir(w_dir):
                     if item_id in seen: continue
                     path = os.path.join(w_dir, item_id)
@@ -492,24 +538,32 @@ class WallpaperApp(QMainWindow):
                         except: pass
             except: pass
             
-        return wallpapers
+        return wallpapers, is_append
 
-    def scan_finished(self, wallpapers):
-        self.list_wallpapers.clear()
+    def scan_finished(self, result):
+        wallpapers, is_append = result
+        if not is_append:
+            self.list_wallpapers.clear()
+        existing_ids = set()
+        for i in range(self.list_wallpapers.count()):
+            data = self.list_wallpapers.item(i).data(Qt.ItemDataRole.UserRole)
+            if data: existing_ids.add(data["id"])
+        new_count = 0
         wallpapers.sort(key=lambda x: x["title"].lower())
         for w in wallpapers:
+            if w["id"] in existing_ids: continue
             item = QListWidgetItem(w["title"])
             item.setData(Qt.ItemDataRole.UserRole, w)
             
-            # Load preview as icon
+                                  
             if w.get("preview"):
                 path = os.path.join(w["path"], w["preview"])
                 if os.path.isfile(path):
                     pixmap = QPixmap(path)
-                    # Scale to fill the icon size nicely
+                                                        
                     icon_pixmap = pixmap.scaled(200, 140, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
                     
-                    # Crop to fixed size
+                                        
                     rect = QRect(0, 0, 200, 140)
                     rect.moveCenter(icon_pixmap.rect().center())
                     icon_pixmap = icon_pixmap.copy(rect)
@@ -517,12 +571,26 @@ class WallpaperApp(QMainWindow):
                     item.setIcon(QIcon(icon_pixmap))
             
             self.list_wallpapers.addItem(item)
+            existing_ids.add(w["id"])
+            new_count += 1
         self.btn_scan.setEnabled(True)
-        self.status_bar.showMessage(self._("status_local_wallpapers_found").format(count=len(wallpapers)))
+        if is_append:
+            self.status_bar.showMessage(f"Added {new_count} new wallpapers.")
+        else:
+            self.status_bar.showMessage(self._("status_local_wallpapers_found").format(count=self.list_wallpapers.count()))
 
     def on_wallpaper_selected(self, item):
         data = item.data(Qt.ItemDataRole.UserRole)
         self.wp_id_input.setText(data["id"])
+
+    def filter_wallpapers(self, text):
+        query = text.lower()
+        for i in range(self.list_wallpapers.count()):
+            item = self.list_wallpapers.item(i)
+            data = item.data(Qt.ItemDataRole.UserRole)
+            title = item.text().lower()
+            wp_id = str(data.get("id", "")).lower()
+            item.setHidden(query not in title and query not in wp_id)
 
     def run_wallpaper(self):
         if not shutil.which("linux-wallpaperengine"):
@@ -594,8 +662,8 @@ class WallpaperApp(QMainWindow):
         screens = []
         try:
             res = subprocess.run(['xrandr', '--query'], capture_output=True, text=True)
-            # Regex to match: Name connected [primary] WxH+X+Y ...
-            # Group 1: Name, Group 2: W, Group 3: H, Group 4: X, Group 5: Y
+                                                                  
+                                                                           
             pattern = re.compile(r'^(\S+)\s+connected\s+(?:primary\s+)?(\d+)x(\d+)\+(\d+)\+(\d+)')
             
             for line in res.stdout.splitlines():

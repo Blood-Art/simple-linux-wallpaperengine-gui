@@ -60,5 +60,7 @@
     "status_error_saving_config": "Статус: Ошибка сохранения конфигурации",
     "status_error_loading_config": "Статус: Ошибка загрузки конфигурации",
     "show_window_tray_menu": "Показать окно",
-    "exit_tray_menu": "Выход"
+    "exit_tray_menu": "Выход",
+    "search_placeholder": "Поиск обоев...",
+    "select_folder_button": "Выбрать папку"
 }

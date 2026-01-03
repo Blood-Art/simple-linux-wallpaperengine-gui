@@ -59,5 +59,7 @@
     "status_error_saving_config": "Statut: Erreur lors de la sauvegarde de la configuration",
     "status_error_loading_config": "Statut: Erreur lors du chargement de la configuration",
     "show_window_tray_menu": "Afficher la fenêtre",
-    "exit_tray_menu": "Quitter"
+    "exit_tray_menu": "Quitter",
+    "search_placeholder": "Rechercher des fonds d'écran...",
+    "select_folder_button": "Choisir un dossier"
 }

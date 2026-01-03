@@ -60,5 +60,7 @@
     "status_error_saving_config": "Estado: Error al guardar la configuración",
     "status_error_loading_config": "Estado: Error al cargar la configuración",
     "show_window_tray_menu": "Mostrar ventana",
-    "exit_tray_menu": "Salir"
+    "exit_tray_menu": "Salir",
+    "search_placeholder": "Buscar fondos de pantalla...",
+    "select_folder_button": "Seleccionar carpeta"
 }

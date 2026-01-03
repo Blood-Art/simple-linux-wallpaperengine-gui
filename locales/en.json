@@ -60,5 +60,7 @@
     "status_error_saving_config": "Status: Error saving config",
     "status_error_loading_config": "Status: Error loading config",
     "show_window_tray_menu": "Show Window",
-    "exit_tray_menu": "Exit"
+    "exit_tray_menu": "Exit",
+    "search_placeholder": "Search wallpapers...",
+    "select_folder_button": "Select Folder"
 }

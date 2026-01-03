@@ -59,5 +59,7 @@
     "status_error_saving_config": "Status: Fehler beim Speichern der Konfiguration",
     "status_error_loading_config": "Status: Fehler beim Laden der Konfiguration",
     "show_window_tray_menu": "Fenster anzeigen",
-    "exit_tray_menu": "Beenden"
+    "exit_tray_menu": "Beenden",
+    "search_placeholder": "Hintergrundbilder suchen...",
+    "select_folder_button": "Ordner auswählen"
 }

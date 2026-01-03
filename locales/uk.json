@@ -59,5 +59,7 @@
     "status_error_saving_config": "Статус: Помилка збереження конфігурації",
     "status_error_loading_config": "Статус: Помилка завантаження конфігурації",
     "show_window_tray_menu": "Показати вікно",
-    "exit_tray_menu": "Вихід"
+    "exit_tray_menu": "Вихід",
+    "search_placeholder": "Пошук шпалер...",
+    "select_folder_button": "Обрати папку"
 }
