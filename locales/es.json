@@ -1,4 +1,3 @@
-
 {
     "app_title": "Linux Wallpaper Engine GUI",
     "control_tab": "Control",
@@ -62,5 +61,21 @@
     "show_window_tray_menu": "Mostrar ventana",
     "exit_tray_menu": "Salir",
     "search_placeholder": "Buscar fondos de pantalla...",
-    "select_folder_button": "Seleccionar carpeta"
+    "select_folder_button": "Seleccionar carpeta",
+    "property_name_header": "Propiedad",
+    "property_value_header": "Valor",
+    "load_properties_button": "Cargar",
+    "add_property_button": "Añadir",
+    "remove_property_button": "Eliminar",
+    "status_loading_properties": "Estado: Cargando propiedades...",
+    "status_properties_loaded": "Estado: {count} propiedades cargadas.",
+    "status_properties_load_failed": "Estado: Error al cargar propiedades: {error}",
+    "status_properties_none": "Estado: No se encontraron propiedades para este fondo.",
+    "status_properties_loaded_timeout": "Estado: {count} propiedades cargadas (tiempo agotado).",
+    "status_properties_none_timeout": "Estado: No se encontraron propiedades (tiempo agotado).",
+    "property_type_header": "Tipo",
+    "properties_filter_placeholder": "Filtrar propiedades...",
+    "properties_select_placeholder": "Seleccionar propiedad...",
+    "apply_property_button": "Aplicar",
+    "property_value_placeholder": "Valor"
 }

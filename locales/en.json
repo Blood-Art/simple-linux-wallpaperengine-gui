@@ -62,5 +62,21 @@
     "show_window_tray_menu": "Show Window",
     "exit_tray_menu": "Exit",
     "search_placeholder": "Search wallpapers...",
-    "select_folder_button": "Select Folder"
+    "select_folder_button": "Select Folder",
+    "property_name_header": "Property",
+    "property_value_header": "Value",
+    "load_properties_button": "Load",
+    "add_property_button": "Add Property",
+    "remove_property_button": "Remove Property",
+    "status_loading_properties": "Status: Loading properties...",
+    "status_properties_loaded": "Status: Loaded {count} properties.",
+    "status_properties_load_failed": "Status: Failed to load properties: {error}",
+    "status_properties_none": "Status: No properties found for this wallpaper.",
+    "status_properties_loaded_timeout": "Status: Loaded {count} properties (timeout).",
+    "status_properties_none_timeout": "Status: No properties found (timeout).",
+    "property_type_header": "Type",
+    "properties_filter_placeholder": "Filter properties...",
+    "properties_select_placeholder": "Select property...",
+    "apply_property_button": "Apply",
+    "property_value_placeholder": "Value"
 }

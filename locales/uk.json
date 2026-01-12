@@ -61,5 +61,21 @@
     "show_window_tray_menu": "Показати вікно",
     "exit_tray_menu": "Вихід",
     "search_placeholder": "Пошук шпалер...",
-    "select_folder_button": "Обрати папку"
+    "select_folder_button": "Обрати папку",
+    "property_name_header": "Властивість",
+    "property_value_header": "Значення",
+    "load_properties_button": "Завантаж.",
+    "add_property_button": "Додати",
+    "remove_property_button": "Видалити",
+    "status_loading_properties": "Статус: Завантаження властивостей...",
+    "status_properties_loaded": "Статус: Завантажено {count} властивостей.",
+    "status_properties_load_failed": "Статус: Помилка завантаження властивостей: {error}",
+    "status_properties_none": "Статус: Властивостей не знайдено для цих шпалер.",
+    "status_properties_loaded_timeout": "Статус: Завантажено {count} властивостей (таймаут).",
+    "status_properties_none_timeout": "Статус: Властивостей не знайдено (таймаут).",
+    "property_type_header": "Тип",
+    "properties_filter_placeholder": "Фільтр властивостей...",
+    "properties_select_placeholder": "Оберіть властивість...",
+    "apply_property_button": "Застосувати",
+    "property_value_placeholder": "Значення"
 }

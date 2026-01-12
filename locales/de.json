@@ -61,5 +61,21 @@
     "show_window_tray_menu": "Fenster anzeigen",
     "exit_tray_menu": "Beenden",
     "search_placeholder": "Hintergrundbilder suchen...",
-    "select_folder_button": "Ordner auswählen"
+    "select_folder_button": "Ordner auswählen",
+    "property_name_header": "Eigenschaft",
+    "property_value_header": "Wert",
+    "load_properties_button": "Laden",
+    "add_property_button": "Hinzufügen",
+    "remove_property_button": "Entfernen",
+    "status_loading_properties": "Status: Eigenschaften werden geladen...",
+    "status_properties_loaded": "Status: {count} Eigenschaften geladen.",
+    "status_properties_load_failed": "Status: Fehler beim Laden der Eigenschaften: {error}",
+    "status_properties_none": "Status: Keine Eigenschaften für dieses Hintergrundbild gefunden.",
+    "status_properties_loaded_timeout": "Status: {count} Eigenschaften geladen (Zeitüberschreitung).",
+    "status_properties_none_timeout": "Status: Keine Eigenschaften gefunden (Zeitüberschreitung).",
+    "property_type_header": "Typ",
+    "properties_filter_placeholder": "Eigenschaften filtern...",
+    "properties_select_placeholder": "Eigenschaft auswählen...",
+    "apply_property_button": "Anwenden",
+    "property_value_placeholder": "Wert"
 }

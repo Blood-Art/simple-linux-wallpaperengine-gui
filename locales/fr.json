@@ -61,5 +61,21 @@
     "show_window_tray_menu": "Afficher la fenêtre",
     "exit_tray_menu": "Quitter",
     "search_placeholder": "Rechercher des fonds d'écran...",
-    "select_folder_button": "Choisir un dossier"
+    "select_folder_button": "Choisir un dossier",
+    "property_name_header": "Propriété",
+    "property_value_header": "Valeur",
+    "load_properties_button": "Charger",
+    "add_property_button": "Ajouter",
+    "remove_property_button": "Supprimer",
+    "status_loading_properties": "Statut: Chargement des propriétés...",
+    "status_properties_loaded": "Statut: {count} propriétés chargées.",
+    "status_properties_load_failed": "Statut: Échec du chargement des propriétés: {error}",
+    "status_properties_none": "Statut: Aucune propriété trouvée pour ce fond d'écran.",
+    "status_properties_loaded_timeout": "Statut: {count} propriétés chargées (délai dépassé).",
+    "status_properties_none_timeout": "Statut: Aucune propriété trouvée (délai dépassé).",
+    "property_type_header": "Type",
+    "properties_filter_placeholder": "Filtrer les propriétés...",
+    "properties_select_placeholder": "Choisir une propriété...",
+    "apply_property_button": "Appliquer",
+    "property_value_placeholder": "Valeur"
 }

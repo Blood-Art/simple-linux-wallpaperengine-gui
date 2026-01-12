@@ -8,8 +8,8 @@ import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QLabel, QLineEdit, QCheckBox, QSlider, QComboBox, 
                              QStackedWidget, QListWidget, QListWidgetItem, QSystemTrayIcon, 
-                             QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect, QStyledItemDelegate, QStyle,
-                             QFileDialog)
+                             QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect,
+                             QStyledItemDelegate, QStyle, QFileDialog)
 from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant
 from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter
 
@@ -145,10 +145,11 @@ class WallpaperApp(QMainWindow):
         super().__init__()
         self.i18n = I18n()
         self.translatable_labels = []
+        self.properties_data = {}
         self.load_config_data()
         self.i18n.load(self.config.get("current_language", "en"))
         self._ = self.i18n.get
-        self.setWindowTitle(self._("app_title"))
+        self.setWindowTitle(f"{self._('app_title')} [build: props-ui-1]")
         self.setFixedSize(1050, 900)
         self.setup_ui()
         self.apply_theme()
@@ -207,6 +208,7 @@ class WallpaperApp(QMainWindow):
         layout.setSpacing(20)
         card_main = self.create_card(layout, "main_controls_frame")
         self.wp_id_input = QLineEdit()
+        self.wp_id_input.textChanged.connect(self.on_wallpaper_id_changed)
         self.screen_combo = QComboBox()
         self.screen_combo.setEditable(True)
         self.add_form_row(card_main, "wallpaper_id_path_label", self.wp_id_input)
@@ -257,7 +259,6 @@ class WallpaperApp(QMainWindow):
         self.combo_clamp.currentTextChanged.connect(self.run_wallpaper)
         self.chk_windowed_mode = QCheckBox("windowed_mode_checkbox")
         self.chk_windowed_mode.clicked.connect(self.run_wallpaper)
-        self.input_props = QLineEdit()
         self.input_custom_args = QLineEdit()
         self.input_custom_args.setPlaceholderText("--window 0x0x1280x720")
         
@@ -276,7 +277,44 @@ class WallpaperApp(QMainWindow):
         self.chk_windowed_mode.toggled.connect(self.lbl_kwin_hint.setVisible)
         card_adv.layout().addWidget(self.lbl_kwin_hint)
 
-        self.add_form_row(card_adv, "set_property_label", self.input_props)
+        props_controls = QHBoxLayout()
+        props_controls.setSpacing(10)
+        props_controls.setContentsMargins(0, 0, 0, 0)
+        self.properties_type = QLabel()
+        self.properties_type.setMinimumWidth(120)
+        self.properties_type.setStyleSheet("color: #A5A5A5;")
+        self.properties_combo = QComboBox()
+        self.properties_combo.setEditable(False)
+        self.properties_combo.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.properties_combo.setMinimumWidth(280)
+        self.properties_combo.addItem(self._("properties_select_placeholder"), None)
+        self.properties_combo.currentIndexChanged.connect(self.on_property_selected)
+        self.properties_value = QLineEdit()
+        self.properties_value.setPlaceholderText(self._("property_value_placeholder"))
+        self.properties_value.editingFinished.connect(self.apply_property_value)
+        self.properties_value.setMinimumWidth(240)
+        self.properties_value.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.btn_load_props = QPushButton("load_properties_button")
+        self.btn_load_props.clicked.connect(self.load_properties)
+        self.btn_apply_prop = QPushButton("apply_property_button")
+        self.btn_apply_prop.clicked.connect(self.apply_property_value)
+        for btn in (self.btn_load_props, self.btn_apply_prop):
+            btn.setMinimumWidth(120)
+            btn.setMinimumHeight(32)
+            btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+
+        props_header = QHBoxLayout()
+        props_label = self.create_label("set_property_label")
+        props_header.addWidget(props_label)
+        props_header.addStretch()
+        props_header.addWidget(self.btn_load_props)
+        props_header.addWidget(self.btn_apply_prop)
+        card_adv.layout().addLayout(props_header)
+
+        props_controls.addWidget(self.properties_combo)
+        props_controls.addWidget(self.properties_type)
+        props_controls.addWidget(self.properties_value, 1)
+        card_adv.layout().addLayout(props_controls)
         self.add_form_row(card_adv, "Custom Arguments", self.input_custom_args)
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(12)
@@ -392,6 +430,10 @@ class WallpaperApp(QMainWindow):
         self.chk_fs_pause.setText(self._("no_fullscreen_pause_checkbox"))
         self.chk_windowed_mode.setText(self._("windowed_mode_checkbox"))
         self.lbl_kwin_hint.setText(self._("kwin_hint"))
+        self.btn_load_props.setText(self._("load_properties_button"))
+        self.btn_apply_prop.setText(self._("apply_property_button"))
+        self.properties_combo.setItemText(0, self._("properties_select_placeholder"))
+        self.properties_value.setPlaceholderText(self._("property_value_placeholder"))
         self.search_input.setPlaceholderText(self._("search_placeholder"))
 
     def switch_page(self, row):
@@ -592,6 +634,208 @@ class WallpaperApp(QMainWindow):
             wp_id = str(data.get("id", "")).lower()
             item.setHidden(query not in title and query not in wp_id)
 
+    def on_property_selected(self):
+        data = self.properties_combo.currentData()
+        if not isinstance(data, dict):
+            self.properties_type.setText("")
+            self.properties_value.blockSignals(True)
+            self.properties_value.clear()
+            self.properties_value.blockSignals(False)
+            return
+        name = data.get("name", "")
+        stored = self.properties_data.get(name, data)
+        self.properties_type.setText(stored.get("type", ""))
+        self.properties_value.blockSignals(True)
+        self.properties_value.setText(stored.get("value", ""))
+        self.properties_value.blockSignals(False)
+
+    def apply_property_value(self):
+        data = self.properties_combo.currentData()
+        if not isinstance(data, dict):
+            return
+        value = self.properties_value.text().strip()
+        data["value"] = value
+        name = data.get("name", "")
+        if name:
+            self.properties_data[name] = data
+        idx = self.properties_combo.currentIndex()
+        self.properties_combo.setItemData(idx, data)
+        self.run_wallpaper()
+
+    def populate_properties_combo(self, props_dict):
+        self.properties_combo.blockSignals(True)
+        self.properties_combo.clear()
+        self.properties_combo.addItem(self._("properties_select_placeholder"), None)
+        self.properties_data = {}
+        for name, data in props_dict.items():
+            item = {
+                "name": name,
+                "value": data.get("value", ""),
+                "sep": data.get("sep", "="),
+                "type": data.get("type", ""),
+            }
+            self.properties_data[name] = item
+            self.properties_combo.addItem(name, item)
+        self.properties_combo.setCurrentIndex(0)
+        self.properties_combo.blockSignals(False)
+        self.on_property_selected()
+
+    def normalize_property_value(self, value):
+        if "," in value:
+            value = re.sub(r"\s*,\s*", ",", value)
+        return value
+
+    def parse_properties_output(self, output):
+        props = []
+
+        text = output.strip()
+        if text:
+            try:
+                parsed = json.loads(text)
+            except Exception:
+                parsed = None
+
+            if parsed is None:
+                start = text.find("{")
+                end = text.rfind("}")
+                if start != -1 and end != -1 and end > start:
+                    try:
+                        parsed = json.loads(text[start:end + 1])
+                    except Exception:
+                        parsed = None
+
+            if isinstance(parsed, dict):
+                for name, value in parsed.items():
+                    props.append((str(name), str(value), "=", ""))
+                return props
+            if isinstance(parsed, list):
+                for item in parsed:
+                    if isinstance(item, dict):
+                        name = item.get("name") or item.get("property") or item.get("key")
+                        if name is None:
+                            continue
+                        value = item.get("value", "")
+                        props.append((str(name), str(value), "=", ""))
+                    elif isinstance(item, str):
+                        props.append((item, "", "=", ""))
+                if props:
+                    return props
+
+        lines = output.splitlines()
+        current_name = None
+        current_type = ""
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("_") or " - " in stripped:
+                parts = stripped.split(" - ", 1)
+                if parts:
+                    current_name = parts[0].strip()
+                    current_type = parts[1].strip() if len(parts) > 1 else ""
+                continue
+            if stripped.startswith("Value:"):
+                if current_name:
+                    value = stripped.split("Value:", 1)[1].strip()
+                    props.append((current_name, value, "=", current_type))
+                    current_name = None
+                    current_type = ""
+                continue
+
+        if props:
+            return props
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            lower = line.lower()
+            if lower.startswith("properties") or line.startswith("#"):
+                continue
+            if lower.startswith("running with") or lower.startswith("particle "):
+                continue
+            if lower.startswith("found user setting with script value"):
+                continue
+            if "=" in line:
+                name, value = line.split("=", 1)
+                sep = "="
+            elif ":" in line:
+                name, value = line.split(":", 1)
+                sep = ":"
+            else:
+                parts = line.split(None, 1)
+                name = parts[0]
+                value = parts[1] if len(parts) > 1 else ""
+                sep = "="
+            name = name.strip()
+            value = value.strip()
+            if name:
+                props.append((name, value, sep, ""))
+        return props
+
+    def list_properties_logic(self, wallpaper_id):
+        cmd = ["linux-wallpaperengine", "-l", wallpaper_id]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        timed_out = False
+        try:
+            stdout, stderr = proc.communicate(timeout=5)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            proc.terminate()
+            stdout, stderr = proc.communicate(timeout=2)
+        returncode = proc.returncode if proc.returncode is not None else 0
+        combined = (stdout or "")
+        if stderr:
+            combined = (combined + "\n" + stderr).strip()
+        return returncode, combined, stderr or "", timed_out, wallpaper_id
+
+    def load_properties(self):
+        wallpaper_id = self.wp_id_input.text().strip()
+        if not wallpaper_id:
+            self.status_bar.showMessage(self._("status_error_empty_id"))
+            return
+        if not shutil.which("linux-wallpaperengine"):
+            self.status_bar.showMessage("Error: linux-wallpaperengine not found")
+            return
+        self.status_bar.showMessage(self._("status_loading_properties"))
+        self.btn_load_props.setEnabled(False)
+        self.props_thread = QThread()
+        self.props_worker = Worker(self.list_properties_logic, wallpaper_id)
+        self.props_worker.moveToThread(self.props_thread)
+        self.props_thread.started.connect(self.props_worker.run)
+        self.props_worker.finished.connect(self.load_properties_finished)
+        self.props_worker.finished.connect(self.props_thread.quit)
+        self.props_worker.finished.connect(self.props_worker.deleteLater)
+        self.props_thread.finished.connect(self.props_thread.deleteLater)
+        self.props_thread.start()
+
+    def load_properties_finished(self, result):
+        returncode, stdout, stderr, timed_out, wallpaper_id = result
+        self.btn_load_props.setEnabled(True)
+        if returncode != 0 and not timed_out:
+            msg = stderr.strip() or "Unknown error"
+            self.status_bar.showMessage(self._("status_properties_load_failed").format(error=msg))
+            return
+        props = self.parse_properties_output(stdout)
+        stored = self.config.get("properties_by_wallpaper", {}).get(wallpaper_id, {})
+        merged = {}
+        for name, value, sep, prop_type in props:
+            data = {"name": name, "value": value, "sep": sep, "type": prop_type}
+            if name in stored:
+                data["value"] = stored[name].get("value", value)
+            merged[name] = data
+        self.populate_properties_combo(merged)
+        if props:
+            if timed_out:
+                self.status_bar.showMessage(self._("status_properties_loaded_timeout").format(count=len(props)))
+            else:
+                self.status_bar.showMessage(self._("status_properties_loaded").format(count=len(props)))
+        else:
+            if timed_out:
+                self.status_bar.showMessage(self._("status_properties_none_timeout"))
+            else:
+                self.status_bar.showMessage(self._("status_properties_none"))
+
     def run_wallpaper(self):
         if not shutil.which("linux-wallpaperengine"):
             from PyQt6.QtWidgets import QMessageBox
@@ -626,9 +870,11 @@ class WallpaperApp(QMainWindow):
         if scale != 'default': cmd.extend(['--scaling', scale])
         clamp = self.combo_clamp.currentText()
         if clamp != 'clamp': cmd.extend(['--clamp', clamp])
-        props = self.input_props.text()
-        if props:
-             for prop in props.split(): cmd.extend(['--set-property', prop])
+        if hasattr(self, "properties_data"):
+            for name, data in self.properties_data.items():
+                value = self.normalize_property_value(str(data.get("value", "")))
+                sep = data.get("sep", "=")
+                cmd.extend(['--set-property', f"{name}{sep}{value}"])
         custom_args = self.input_custom_args.text()
         if custom_args:
              for arg in custom_args.split(): cmd.append(arg)
@@ -688,9 +934,16 @@ class WallpaperApp(QMainWindow):
             try:
                 with open(CONFIG_FILE, 'r') as f: self.config = json.load(f)
             except: pass
+        if "properties_by_wallpaper" not in self.config:
+            self.config["properties_by_wallpaper"] = {}
     
     def apply_config_ui(self):
         pass
+
+    def on_wallpaper_id_changed(self):
+        wallpaper_id = self.wp_id_input.text().strip()
+        stored = self.config.get("properties_by_wallpaper", {}).get(wallpaper_id, {})
+        self.populate_properties_combo(stored)
 
     def save_config(self):
         self.config["last_wallpaper"] = {
@@ -701,6 +954,16 @@ class WallpaperApp(QMainWindow):
             "custom_args": self.input_custom_args.text(),
             "windowed_mode": self.chk_windowed_mode.isChecked()
         }
+        wallpaper_id = self.wp_id_input.text().strip()
+        if wallpaper_id:
+            props_out = {}
+            for name, data in self.properties_data.items():
+                props_out[name] = {
+                    "value": str(data.get("value", "")),
+                    "sep": data.get("sep", "="),
+                    "type": data.get("type", ""),
+                }
+            self.config.setdefault("properties_by_wallpaper", {})[wallpaper_id] = props_out
         with open(CONFIG_FILE, 'w') as f: json.dump(self.config, f, indent=4)
 
     def setup_tray(self):

@@ -62,5 +62,21 @@
     "show_window_tray_menu": "Показать окно",
     "exit_tray_menu": "Выход",
     "search_placeholder": "Поиск обоев...",
-    "select_folder_button": "Выбрать папку"
+    "select_folder_button": "Выбрать папку",
+    "property_name_header": "Свойство",
+    "property_value_header": "Значение",
+    "load_properties_button": "Загрузить",
+    "add_property_button": "Добавить",
+    "remove_property_button": "Удалить",
+    "status_loading_properties": "Статус: Загрузка свойств...",
+    "status_properties_loaded": "Статус: Загружено свойств: {count}.",
+    "status_properties_load_failed": "Статус: Ошибка загрузки свойств: {error}",
+    "status_properties_none": "Статус: Свойства не найдены для этих обоев.",
+    "status_properties_loaded_timeout": "Статус: Загружено свойств: {count} (таймаут).",
+    "status_properties_none_timeout": "Статус: Свойства не найдены (таймаут).",
+    "property_type_header": "Тип",
+    "properties_filter_placeholder": "Фильтр свойств...",
+    "properties_select_placeholder": "Выберите свойство...",
+    "apply_property_button": "Применить",
+    "property_value_placeholder": "Значение"
 }
