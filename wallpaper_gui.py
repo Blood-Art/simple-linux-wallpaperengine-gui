@@ -166,6 +166,8 @@ class WallpaperApp(QMainWindow):
         self.update_texts()
         QTimer.singleShot(500, self.restore_last_wallpaper)
 
+        self.wallpaper_proc = None
+
     def setup_ui(self):
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
@@ -885,17 +887,21 @@ class WallpaperApp(QMainWindow):
              for arg in custom_args.split(): cmd.append(arg)
         self.stop_wallpapers()
         try:
-            subprocess.Popen(cmd)
+            self.wallpaper_proc = subprocess.Popen(cmd)
             self.status_bar.showMessage(self._("status_command_launched"))
             self.save_config()
         except Exception as e:
+            logging.error("Couldn't run with error %s", e)
             self.status_bar.showMessage(f"Error: {e}")
 
     def stop_wallpapers(self):
+        if self.wallpaper_proc is None:
+            return
         try:
-            subprocess.run(['pkill', '-f', 'linux-wallpaperengine'], stderr=subprocess.DEVNULL)
+            self.wallpaper_proc.terminate()
             self.status_bar.showMessage(self._("status_all_stopped"))
         except Exception as e:
+            logging.error("Couldn't stop wallpaper with error %s", e)
             self.status_bar.showMessage(f"Error stopping: {e}")
 
     def restore_last_wallpaper(self):
@@ -939,7 +945,7 @@ class WallpaperApp(QMainWindow):
             logging.info("Attempting to read config from: %s", CONFIG_FILE)
             try:
                 with open(CONFIG_FILE, 'r') as f: self.config = json.load(f)
-            except e:
+            except Exception as e:
                 logging.info("Failed to open config with error %s", e)
         if "properties_by_wallpaper" not in self.config:
             self.config["properties_by_wallpaper"] = {}

@@ -19,6 +19,7 @@
         packaging
       ]);
   in {
+    packages.${system}.default = pkgs.callPackage ./package.nix {};
     devShells.${system}.default = pkgs.mkShell {
       packages = [
         pythonEnv
