@@ -978,9 +978,10 @@ class WallpaperApp(QMainWindow):
                 }
             self.config.setdefault("properties_by_wallpaper", {})[wallpaper_id] = props_out
         try:
+            CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
             with open(CONFIG_FILE, 'w') as f: json.dump(self.config, f, indent=4)
-        except:
-            logging.error("Couldn't save config")
+        except Exception as e:
+            logging.error("Couldn't save config with error %s", e)
 
     def setup_tray(self):
         self.tray = QSystemTrayIcon(QApplication.instance())
