@@ -1,7 +1,7 @@
 flake: {
   config,
   lib,
-  system,
+  pkgs,
   ...
 }: let
   cfg = config.services.simple-linux-wallpaperengine;
@@ -34,7 +34,7 @@ in {
 
       Service = {
         Type = "simple";
-        ExecStart = "${lib.getExe flake.packages.${system}.default} --background";
+        ExecStart = "${lib.getExe flake.packages.${pkgs.system}.default} --background";
 
         Restart = "always";
         RestartSec = 10;
