@@ -8,6 +8,8 @@ import subprocess
 import shutil
 import re
 import pathlib
+import logging
+
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QLineEdit, QCheckBox, QSlider, QComboBox,
                              QStackedWidget, QListWidget, QListWidgetItem, QSystemTrayIcon,
@@ -544,7 +546,7 @@ class WallpaperApp(QMainWindow):
                             if os.path.isdir(line):
                                 workshop_dirs.add(line)
                 except Exception as e:
-                    print(f"Deep scan error: {e}")
+                    logging.error(f"Deep scan error: {e}")
 
         wallpapers = []
         seen = set()
@@ -924,7 +926,7 @@ class WallpaperApp(QMainWindow):
                         "w": w, "h": h, "x": x, "y": y
                     })
         except Exception as e:
-            print(f"Screen detection error: {e}")
+            logging.error(f"Screen detection error: {e}")
 
         if not screens:
             screens = [{"name": "eDP-1", "w": "1920", "h": "1080", "x": "0", "y": "0"}]
@@ -967,7 +969,10 @@ class WallpaperApp(QMainWindow):
                     "type": data.get("type", ""),
                 }
             self.config.setdefault("properties_by_wallpaper", {})[wallpaper_id] = props_out
-        with open(CONFIG_FILE, 'w') as f: json.dump(self.config, f, indent=4)
+        try:
+            with open(CONFIG_FILE, 'w') as f: json.dump(self.config, f, indent=4)
+        except:
+            logging.error("Couldn't save config")
 
     def setup_tray(self):
         self.tray = QSystemTrayIcon(QApplication.instance())
@@ -1006,6 +1011,8 @@ class WallpaperApp(QMainWindow):
         QApplication.quit()
 
 if __name__ == "__main__":
+
+    logging.basicConfig(format='[%(asctime)s] [%(levelname)s]:  %(message)s')
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     app.setStyle("Fusion")
