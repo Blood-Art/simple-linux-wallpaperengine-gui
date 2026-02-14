@@ -30,22 +30,23 @@ pkgs.stdenv.mkDerivation rec {
     install -Dm755 ./wallpaper_gui.py $out/bin/simple-wallpaper-engine
     wrapProgram $out/bin/simple-wallpaper-engine \
       --prefix PATH : ${lib.makeBinPath propagatedBuildInputs}
+    mkdir -p $out/share/applications
+    cp ${desktopItem}/share/applications/*.desktop \
+       $out/share/applications/
   '';
 
-  desktopItems = [
-    (pkgs.makeDesktopItem {
-      name = "simple-wallpaper-engine";
-      desktopName = "Simple Wallpaper Engine";
-      comment = "A modern GUI for linux-wallpaperengine";
-      exec = "simple-wallpaper-engine";
-      icon = "preferences-desktop-wallpaper";
-      terminal = false;
-      type = "Application";
-      categories = ["Utility" "Settings" "DesktopSettings" "Qt"];
-      keywords = ["wallpaper" "engine" "background" "steam"];
-      startupNotify = true;
-    })
-  ];
+  desktopItem = pkgs.makeDesktopItem {
+    name = "simple-wallpaper-engine";
+    desktopName = "Simple Wallpaper Engine";
+    comment = "A modern GUI for linux-wallpaperengine";
+    exec = "simple-wallpaper-engine";
+    icon = "preferences-desktop-wallpaper";
+    terminal = false;
+    type = "Application";
+    categories = ["Utility" "Settings" "DesktopSettings" "Qt"];
+    keywords = ["wallpaper" "engine" "background" "steam"];
+    startupNotify = true;
+  };
 
   meta = {
     description = "Simple Linux Wallpaper Engine GUI";
