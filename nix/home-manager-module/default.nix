@@ -34,7 +34,7 @@ in {
 
       Service = {
         Type = "simple";
-        ExecStart = "${lib.getExe flake.packages.${pkgs.system}.default} --background";
+        ExecStart = "${lib.getExe flake.packages.${pkgs.stdenv.hostPlatform.system}.default} --background";
 
         Restart = "always";
         RestartSec = 10;
