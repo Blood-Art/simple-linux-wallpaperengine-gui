@@ -8,6 +8,19 @@ flake: {
 in {
   options.services.simple-wallpaper-engine = {
     enable = lib.mkEnableOption "Wallpaper service (user systemd)";
+
+    # Optional: make it wait for your compositor / session bits.
+    after = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = ["graphical-session.target"];
+      description = "systemd units to start after.";
+    };
+
+    wants = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = ["graphical-session.target"];
+      description = "systemd units to pull in.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
