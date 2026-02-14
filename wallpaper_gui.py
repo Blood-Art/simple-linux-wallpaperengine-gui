@@ -926,6 +926,25 @@ class WallpaperApp(QMainWindow):
             else:
                 self.status_bar.showMessage(self._("status_properties_none"))
 
+    def kill_external_wallpapers(self):
+        try:
+            # Find all processes matching the backend name
+            # We use pgrep to get PIDs, then filter out our own PID
+            cmd = ["pgrep", "-f", "linux-wallpaperengine"]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode == 0:
+                my_pid = os.getpid()
+                for pid_str in result.stdout.splitlines():
+                    try:
+                        pid = int(pid_str)
+                        # Don't kill ourselves!
+                        if pid != my_pid:
+                            os.kill(pid, 15) # SIGTERM
+                    except (ValueError, ProcessLookupError):
+                        pass
+        except Exception as e:
+            logging.error(f"Failed to kill external wallpapers: {e}")
+
     def run_wallpaper(self):
         if not shutil.which("linux-wallpaperengine"):
             from PyQt6.QtWidgets import QMessageBox
@@ -991,11 +1010,8 @@ class WallpaperApp(QMainWindow):
         # ensure we clean up any orphaned linux-wallpaperengine processes.
         # This restores the "force stop" capability users expect.
         if not stopped_internal:
-            try:
-                subprocess.run(["pkill", "-f", "linux-wallpaperengine"], check=False)
-                self.status_bar.showMessage(self._("status_all_stopped"))
-            except Exception as e:
-                logging.error(f"Fallback pkill failed: {e}")
+            self.kill_external_wallpapers()
+            self.status_bar.showMessage(self._("status_all_stopped"))
         else:
             self.status_bar.showMessage(self._("status_all_stopped"))
             
@@ -1135,10 +1151,7 @@ class WallpaperApp(QMainWindow):
             self.watcher.stop()
         
         # Force kill any remaining backend processes to ensure clean exit
-        try:
-            subprocess.run(["pkill", "-f", "linux-wallpaperengine"], check=False)
-        except Exception:
-            pass
+        self.kill_external_wallpapers()
             
         QApplication.quit()
 
