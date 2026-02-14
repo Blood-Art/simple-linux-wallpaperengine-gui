@@ -261,7 +261,7 @@ class WallpaperApp(QMainWindow):
         self.nav_bar = QListWidget()
         self.nav_bar.setObjectName("Sidebar")
         self.nav_bar.setFlow(QListWidget.Flow.LeftToRight)
-        self.nav_bar.setFixedWidth(260)
+        self.nav_bar.setFixedWidth(450)
         self.nav_bar.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.addItems(["Control", "Library"])
@@ -1129,9 +1129,17 @@ class WallpaperApp(QMainWindow):
             self.quit_app()
 
     def quit_app(self):
+        logging.info("Exiting application...")
         self.stop_wallpapers()
         if hasattr(self, 'watcher'):
             self.watcher.stop()
+        
+        # Force kill any remaining backend processes to ensure clean exit
+        try:
+            subprocess.run(["pkill", "-f", "linux-wallpaperengine"], check=False)
+        except Exception:
+            pass
+            
         QApplication.quit()
 
 if __name__ == "__main__":
