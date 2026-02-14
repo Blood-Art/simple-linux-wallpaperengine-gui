@@ -11,13 +11,15 @@ in {
     xdg-autostart = lib.mkEnableOption "Wallpaper service (user systemd)";
   };
 
-  config = lib.mkIf cfg.enable {
-    cfg.xdg-autostart = lib.mkDefault true;
-    xdg.autostart = {
-      enable = lib.mkDefault true;
-      entries = [
-        "${flake.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/applications/simple-wallpaper-engine.desktop"
-      ];
-    };
-  };
+  config = lib.mkIf cfg.enable ({
+      cfg.xdg-autostart = lib.mkDefault true;
+    }
+    // (lib.mkIf cfg.xdg-autostart {
+      xdg.autostart = {
+        enable = lib.mkDefault true;
+        entries = [
+          "${flake.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/applications/simple-wallpaper-engine.desktop"
+        ];
+      };
+    }));
 }
