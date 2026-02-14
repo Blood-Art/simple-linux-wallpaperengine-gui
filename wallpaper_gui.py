@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
 from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant
 from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter
 
-CONFIG_FILE = pathlib.Path(os.getenv("XDG_CONFIG_HOME")) / "linux-wallpaperengine-gui" / "wpe_gui_config.json"
+CONFIG_FILE = pathlib.Path(os.getenv("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))) / "linux-wallpaperengine-gui" / "wpe_gui_config.json"
 LOCALE_DIR = (pathlib.Path(__file__).parent / "locales").absolute()
 
 MACOS_DARK = """
@@ -895,14 +895,28 @@ class WallpaperApp(QMainWindow):
             self.status_bar.showMessage(f"Error: {e}")
 
     def stop_wallpapers(self):
-        if self.wallpaper_proc is None:
-            return
-        try:
-            self.wallpaper_proc.terminate()
+        stopped_internal = False
+        if self.wallpaper_proc is not None:
+            try:
+                self.wallpaper_proc.terminate()
+                self.wallpaper_proc.wait(timeout=1)
+                stopped_internal = True
+            except Exception as e:
+                logging.error("Couldn't stop internal wallpaper process: %s", e)
+        
+        # Fallback: If we didn't stop a child process (e.g. GUI restarted), 
+        # ensure we clean up any orphaned linux-wallpaperengine processes.
+        # This restores the "force stop" capability users expect.
+        if not stopped_internal:
+            try:
+                subprocess.run(["pkill", "-f", "linux-wallpaperengine"], check=False)
+                self.status_bar.showMessage(self._("status_all_stopped"))
+            except Exception as e:
+                logging.error(f"Fallback pkill failed: {e}")
+        else:
             self.status_bar.showMessage(self._("status_all_stopped"))
-        except Exception as e:
-            logging.error("Couldn't stop wallpaper with error %s", e)
-            self.status_bar.showMessage(f"Error stopping: {e}")
+            
+        self.wallpaper_proc = None
 
     def restore_last_wallpaper(self):
         c = self.config.get("last_wallpaper", {})
@@ -941,6 +955,22 @@ class WallpaperApp(QMainWindow):
 
     def load_config_data(self):
         self.config = {}
+        
+        # Ensure config directory exists
+        try:
+            CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logging.error(f"Failed to create config directory: {e}")
+
+        # Migration: Check for old config in current working directory
+        old_config_path = pathlib.Path(__file__).parent / "wpe_gui_config.json"
+        if old_config_path.exists() and not CONFIG_FILE.exists():
+            logging.info(f"Migrating config from {old_config_path} to {CONFIG_FILE}")
+            try:
+                shutil.move(str(old_config_path), str(CONFIG_FILE))
+            except Exception as e:
+                logging.error(f"Migration failed: {e}")
+
         if os.path.exists(CONFIG_FILE):
             logging.info("Attempting to read config from: %s", CONFIG_FILE)
             try:
