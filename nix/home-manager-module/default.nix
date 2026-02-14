@@ -13,6 +13,10 @@ in {
 
   config = lib.mkIf cfg.enable ({
       cfg.xdg-autostart = lib.mkDefault true;
+
+      home.packages = [
+        flake.packages.${pkgs.stdenv.hostPlatform.system}.default
+      ];
     }
     // (lib.mkIf cfg.xdg-autostart {
       xdg.autostart = {
