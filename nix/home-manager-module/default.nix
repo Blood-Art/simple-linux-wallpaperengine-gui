@@ -5,24 +5,25 @@ flake: {
   ...
 }: let
   cfg = config.programs.simple-wallpaper-engine;
+  pkg = flake.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in {
   options.programs.simple-wallpaper-engine = {
-    enable = lib.mkEnableOption "Wallpaper service (user systemd)";
-    xdg-autostart = lib.mkEnableOption "Wallpaper service (user systemd)";
+    enable = lib.mkEnableOption "Wallpaper Engine Service";
+    xdgAutostart = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable XDG autostart entry";
+    };
   };
 
   config = lib.mkIf cfg.enable ({
-      cfg.xdg-autostart = lib.mkDefault true;
-
-      home.packages = [
-        flake.packages.${pkgs.stdenv.hostPlatform.system}.default
-      ];
+      home.packages = [pkg];
     }
-    // (lib.mkIf cfg.xdg-autostart {
+    // (lib.mkIf cfg.xdgAutostart {
       xdg.autostart = {
-        enable = lib.mkDefault true;
+        enable = true;
         entries = [
-          "${flake.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/applications/simple-wallpaper-engine.desktop"
+          "${pkg}/share/applications/simple-wallpaper-engine.desktop"
         ];
       };
     }));
