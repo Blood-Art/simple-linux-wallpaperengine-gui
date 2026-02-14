@@ -20,7 +20,7 @@ yay -S simple-linux-wallpaperengine-gui-git
 ```
 
 ## 1. Prerequisites (The Backend)
-This is just a GUI. You **must** install the core backend engine first.
+This is just a GUI. You **must** install the core backend engine first. If you installed my GUI from AUR, then the main backend engine from Almamu(https://github.com/Almamu/linux-wallpaperengine) comes as a dependency. So you can skip this step.
 
 ### Arch / Manjaro
 ```bash
