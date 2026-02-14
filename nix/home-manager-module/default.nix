@@ -4,9 +4,9 @@ flake: {
   pkgs,
   ...
 }: let
-  cfg = config.services.simple-wallpaper-engine;
+  cfg = config.programs.simple-wallpaper-engine;
 in {
-  options.services.simple-wallpaper-engine = {
+  options.programs.simple-wallpaper-engine = {
     enable = lib.mkEnableOption "Wallpaper service (user systemd)";
     xdg-autostart = lib.mkEnableOption "Wallpaper service (user systemd)";
   };
