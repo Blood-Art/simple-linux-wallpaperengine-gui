@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Simple Wallpaper Engine
 Comment=A modern GUI for linux-wallpaperengine
-Exec=/usr/bin/simple-wallpaper-engine
+Exec=/usr/bin/env simple-wallpaper-engine
 Icon=preferences-desktop-wallpaper
 Terminal=false
 Type=Application
