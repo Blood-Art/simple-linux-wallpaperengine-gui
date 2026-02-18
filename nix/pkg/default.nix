@@ -26,6 +26,7 @@ pkgs.stdenv.mkDerivation rec {
     mkdir -p $out/bin
     cp -r ./locales $out/bin
     install -Dm755 ./wallpaper_gui.py $out/bin/simple-wallpaper-engine
+    install -Dm644 ./process_manager.py $out/bin/process_manager.py
     wrapProgram $out/bin/simple-wallpaper-engine \
       --prefix PATH : ${lib.makeBinPath propagatedBuildInputs}
     mkdir -p $out/share/applications
