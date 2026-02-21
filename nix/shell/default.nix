@@ -4,6 +4,7 @@
       pyqt6
       pillow
       packaging
+      watchdog
     ]);
 in
   pkgs.mkShell {

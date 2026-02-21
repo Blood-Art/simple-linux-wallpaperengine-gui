@@ -26,6 +26,7 @@
     "set_wallpaper_button": "Set Wallpaper",
     "preview_in_window_button": "Preview in Window",
     "stop_button": "Stop",
+    "show_log_button": "Show Log File",
     "restore_last_button": "Restore Last Wallpaper",
     "auto_restore_checkbox": "Auto-restore wallpaper on startup",
     "stop_on_exit_checkbox": "Stop wallpapers when exiting the app",

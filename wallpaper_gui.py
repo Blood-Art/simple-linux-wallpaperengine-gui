@@ -7,7 +7,6 @@ import json
 import subprocess
 import shutil
 import re
-import time
 import pathlib
 import logging
 import argparse
@@ -19,8 +18,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QStackedWidget, QListWidget, QListWidgetItem, QSystemTrayIcon,
                              QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect,
                              QStyledItemDelegate, QStyle, QFileDialog)
-from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant
-from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter
+from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant, QUrl
+from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter, QDesktopServices
+from process_manager import WallpaperProcessManager
 
 CONFIG_FILE = pathlib.Path(os.getenv("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))) / "linux-wallpaperengine-gui" / "wpe_gui_config.json"
 LOCALE_DIR = (pathlib.Path(__file__).parent / "locales").absolute()
@@ -239,7 +239,11 @@ class WallpaperApp(QMainWindow):
 
         QTimer.singleShot(500, self.restore_last_wallpaper)
 
-        self.wallpaper_proc = None
+        self.wallpaper_proc_manager = WallpaperProcessManager()
+        self.wallpaper_watchdog = QTimer()
+        self.wallpaper_watchdog.setInterval(1000)
+        self.wallpaper_watchdog.timeout.connect(self.check_wallpaper_process)
+        self.wallpaper_watchdog.start()
 
     def on_library_changed_auto(self):
         # Trigger a scan if one isn't already running
@@ -412,12 +416,18 @@ class WallpaperApp(QMainWindow):
         self.btn_set.clicked.connect(self.run_wallpaper)
         self.btn_set.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_set.setMinimumHeight(32)
+        self.btn_show_log = QPushButton("show_log_button")
+        self.btn_show_log.setObjectName("SecondaryButton")
+        self.btn_show_log.clicked.connect(self.show_log_file)
+        self.btn_show_log.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_show_log.setMinimumHeight(32)
         self.btn_stop = QPushButton("stop_button")
         self.btn_stop.setObjectName("DangerButton")
         self.btn_stop.clicked.connect(self.stop_wallpapers)
         self.btn_stop.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_stop.setMinimumHeight(32)
         btn_layout.addWidget(self.btn_set)
+        btn_layout.addWidget(self.btn_show_log)
         btn_layout.addWidget(self.btn_stop)
         layout.addStretch()
 
@@ -509,6 +519,7 @@ class WallpaperApp(QMainWindow):
         self.btn_set.setText(self._("set_wallpaper_button"))
         self.btn_set_library.setText(self._("set_wallpaper_button"))
         self.btn_stop.setText(self._("stop_button"))
+        self.btn_show_log.setText(self._("show_log_button"))
         self.btn_scan.setText(self._("scan_local_wallpapers_button"))
         self.btn_select_folder.setText(self._("select_folder_button"))
         self.chk_silent.setText(self._("silent_checkbox"))
@@ -933,23 +944,7 @@ class WallpaperApp(QMainWindow):
                 self.status_bar.showMessage(self._("status_properties_none"))
 
     def kill_external_wallpapers(self):
-        try:
-            # Find all processes matching the backend name
-            # We use pgrep to get PIDs, then filter out our own PID
-            cmd = ["pgrep", "-f", "linux-wallpaperengine"]
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            if result.returncode == 0:
-                my_pid = os.getpid()
-                for pid_str in result.stdout.splitlines():
-                    try:
-                        pid = int(pid_str)
-                        # Don't kill ourselves!
-                        if pid != my_pid:
-                            os.kill(pid, 15) # SIGTERM
-                    except (ValueError, ProcessLookupError):
-                        pass
-        except Exception as e:
-            logging.error(f"Failed to kill external wallpapers: {e}")
+        self.wallpaper_proc_manager.kill_external("linux-wallpaperengine")
 
     def run_wallpaper(self):
         if not shutil.which("linux-wallpaperengine"):
@@ -997,20 +992,25 @@ class WallpaperApp(QMainWindow):
              for arg in custom_args.split(): cmd.append(arg)
         self.stop_wallpapers()
         try:
-            self.wallpaper_proc = subprocess.Popen(cmd)
+            self.wallpaper_proc_manager.start(cmd)
             self.status_bar.showMessage(self._("status_command_launched"))
             self.save_config()
         except Exception as e:
             logging.error("Couldn't run with error %s", e)
             self.status_bar.showMessage(f"Error: {e}")
 
+    def show_log_file(self):
+        log_path = self.wallpaper_proc_manager.log_path()
+        if not log_path.exists():
+            self.status_bar.showMessage("Log file not found.")
+            return
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(log_path)))
+
     def stop_wallpapers(self):
         stopped_internal = False
-        if self.wallpaper_proc is not None:
+        if self.wallpaper_proc_manager.is_running():
             try:
-                self.wallpaper_proc.terminate()
-                self.wallpaper_proc.wait(timeout=1)
-                stopped_internal = True
+                stopped_internal = self.wallpaper_proc_manager.stop(timeout=1)
             except Exception as e:
                 logging.error("Couldn't stop internal wallpaper process: %s", e)
 
@@ -1023,7 +1023,22 @@ class WallpaperApp(QMainWindow):
         else:
             self.status_bar.showMessage(self._("status_all_stopped"))
 
-        self.wallpaper_proc = None
+    def check_wallpaper_process(self):
+        result = self.wallpaper_proc_manager.check()
+        if result is None:
+            return
+        if result["expected"]:
+            return
+        returncode = result["returncode"]
+        if returncode == 0:
+            msg = "Wallpaper process exited."
+        else:
+            msg = f"Wallpaper process crashed (code {returncode})."
+        if result["log_path"]:
+            msg = f"{msg} Log: {result['log_path']}"
+        self.status_bar.showMessage(msg)
+        if hasattr(self, "tray") and self.tray.isVisible():
+            self.tray.showMessage("Wallpaper Engine", msg)
 
     def restore_last_wallpaper(self):
         c = self.config.get("last_wallpaper", {})
