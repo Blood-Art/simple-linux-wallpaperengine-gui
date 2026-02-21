@@ -1032,6 +1032,8 @@ class WallpaperApp(QMainWindow):
         self.screen_combo.setCurrentText(c.get("screen", ""))
         self.chk_silent.setChecked(c.get("silent", False))
         self.slider_volume.setValue(c.get("volume", 15))
+        self.chk_no_automute.setChecked(c.get("noautomute", False))
+        self.chk_no_proc.setChecked(c.get("no-audio-processing", False))
         self.input_custom_args.setText(c.get("custom_args", ""))
         self.chk_windowed_mode.setChecked(c.get("windowed_mode", False))
         self.run_wallpaper()
@@ -1101,6 +1103,8 @@ class WallpaperApp(QMainWindow):
             "screen": self.screen_combo.currentText(),
             "silent": self.chk_silent.isChecked(),
             "volume": self.slider_volume.value(),
+            "noautomute": self.chk_no_automute.isChecked(),
+            "no-audio-processing": self.chk_no_proc.isChecked(),
             "custom_args": self.input_custom_args.text(),
             "windowed_mode": self.chk_windowed_mode.isChecked()
         }
