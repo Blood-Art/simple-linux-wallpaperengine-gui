@@ -23,7 +23,7 @@ install_system_deps() {
             echo "Installing dependencies for Fedora based systems..."
             sudo dnf install -y python3 python3-pip git
             ;;
-        arch|manjaro|endeavouros)
+        arch|manjaro|endeavouros|cachyos)
             echo "Installing dependencies for Arch based systems..."
             sudo pacman -Sy --noconfirm python python-pip git
             ;;
