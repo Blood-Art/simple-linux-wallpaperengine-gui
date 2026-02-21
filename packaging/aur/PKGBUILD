@@ -26,6 +26,7 @@ package() {
     # Install main script and locales
     install -d "$pkgdir/usr/lib/${pkgname%-git}"
     install -m755 wallpaper_gui.py "$pkgdir/usr/lib/${pkgname%-git}/wallpaper_gui.py"
+    install -m644 process_manager.py "$pkgdir/usr/lib/${pkgname%-git}/process_manager.py"
     cp -r locales "$pkgdir/usr/lib/${pkgname%-git}/"
 
     # Create launcher script in /usr/bin
