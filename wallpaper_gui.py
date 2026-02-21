@@ -1036,6 +1036,8 @@ class WallpaperApp(QMainWindow):
         self.chk_no_proc.setChecked(c.get("no-audio-processing", False))
         self.slider_fps.setValue(c.get("fps", 30))
         self.chk_mouse.setChecked(c.get("disable-mouse", False))
+        self.chk_parallax.setChecked(c.get("disable-parallax", False))
+        self.chk_fs_pause.setChecked(c.get("no-fullscreen-pause", False))
         self.input_custom_args.setText(c.get("custom_args", ""))
         self.chk_windowed_mode.setChecked(c.get("windowed_mode", False))
         self.run_wallpaper()
@@ -1109,6 +1111,8 @@ class WallpaperApp(QMainWindow):
             "no-audio-processing": self.chk_no_proc.isChecked(),
             "fps": self.slider_fps.value(),
             "disable-mouse": self.chk_mouse.isChecked(),
+            "disable-parallax": self.chk_parallax.isChecked(),
+            "no-fullscreen-pause": self.chk_fs_pause.isChecked(),
             "custom_args": self.input_custom_args.text(),
             "windowed_mode": self.chk_windowed_mode.isChecked()
         }
