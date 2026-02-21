@@ -687,7 +687,12 @@ class WallpaperApp(QMainWindow):
             data = self.list_wallpapers.item(i).data(Qt.ItemDataRole.UserRole)
             if data: existing_ids.add(data["id"])
         new_count = 0
+        # Sort By Name
         wallpapers.sort(key=lambda x: x["title"].lower())
+
+        # Sort By Date of Subscription
+        wallpapers.sort(key=lambda x: os.path.getctime(x["path"]), reverse=True)
+
         for w in wallpapers:
             if w["id"] in existing_ids: continue
             item = QListWidgetItem(w["title"])
