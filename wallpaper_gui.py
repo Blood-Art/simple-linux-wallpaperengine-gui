@@ -762,9 +762,11 @@ class WallpaperApp(QMainWindow):
 
     def sort_wallpapers(self, wallpapers):
         try:
-            # if sorting type has changed via combo box signal we need to reassign wallpapers
+            # if sorting type has changed via combo box signal
             if type(wallpapers) == str:
                 wallpapers = self.scan_logic()[0]
+                self.config["sorting_type"] = self.sorting_type.currentText()
+                self.save_config()
 
             # Refresh library after sorting
             if self.watcher:
@@ -772,7 +774,7 @@ class WallpaperApp(QMainWindow):
 
             if self.sorting_type.currentText() == "Name":
                 if not self.sort_reversed_state:
-                    wallpapers.sort(key=lambda x: x["title"].lower())
+                    return wallpapers.sort(key=lambda x: x["title"].lower())
                 else:
                     return wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
 
@@ -799,6 +801,9 @@ class WallpaperApp(QMainWindow):
         else:
             self.btn_reverse_sorted.setText("↑")
             self.sort_reversed_state = False
+
+        self.config["reversed"] = self.sort_reversed_state
+        self.save_config()
 
     def on_property_selected(self):
         data = self.properties_combo.currentData()
@@ -1115,6 +1120,10 @@ class WallpaperApp(QMainWindow):
         self.input_custom_args.setText(c.get("custom_args", ""))
         self.chk_windowed_mode.setChecked(c.get("windowed_mode", False))
         self.run_wallpaper()
+        # Library Settings
+        self.sorting_type.setCurrentText(self.config.get("sorting_type", "name"))
+        self.sort_reversed_state = self.config.get("reversed", False)
+        self.btn_reverse_sorted.setText("↑") if self.sort_reversed_state == False else self.btn_reverse_sorted.setText("↓")
 
     def detect_screens(self):
         screens = []
@@ -1188,7 +1197,7 @@ class WallpaperApp(QMainWindow):
             "disable-parallax": self.chk_parallax.isChecked(),
             "no-fullscreen-pause": self.chk_fs_pause.isChecked(),
             "custom_args": self.input_custom_args.text(),
-            "windowed_mode": self.chk_windowed_mode.isChecked()
+            "windowed_mode": self.chk_windowed_mode.isChecked(),
         }
         wallpaper_id = self.wp_id_input.text().strip()
         if wallpaper_id:
