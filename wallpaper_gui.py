@@ -547,6 +547,7 @@ class WallpaperApp(QMainWindow):
 
     def switch_page(self, row):
         self.stack.setCurrentIndex(row)
+        self.start_scan()
 
     def change_lang(self, text):
         code = self.combo_lang.currentData()
