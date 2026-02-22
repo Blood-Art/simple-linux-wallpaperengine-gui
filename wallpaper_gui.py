@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QPushButton, QLabel, QLineEdit, QCheckBox, QSlider, QComboBox,
                              QStackedWidget, QListWidget, QListWidgetItem, QSystemTrayIcon,
                              QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect,
-                             QStyledItemDelegate, QStyle, QFileDialog)
+                             QStyledItemDelegate, QStyle, QStyleOptionSlider, QFileDialog)
 from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant, QUrl
 from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter, QDesktopServices
 from process_manager import WallpaperProcessManager
@@ -213,6 +213,19 @@ class LibraryWatcher(QObject):
             self.observer.stop()
             self.observer.join()
 
+
+class clickable_slider(QSlider):
+
+    def mousePressEvent(self, signal):
+
+        if signal.button() == Qt.MouseButton.LeftButton:
+            offset = 5
+            value = QStyle.sliderValueFromPosition(self.minimum() - offset, self.maximum() + offset,
+                                                   signal.pos().x(), self.width())
+            self.setValue(value)
+
+        super().mousePressEvent(signal)
+
 class WallpaperApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -228,6 +241,9 @@ class WallpaperApp(QMainWindow):
         self.apply_theme()
         self.apply_config_ui()
         self.setup_tray()
+        self.start_scan()
+        self.stack.setCurrentIndex(1)
+        self.nav_bar.setCurrentRow(1)
         self.screens = self.detect_screens()
         for s in self.screens:
             self.screen_combo.addItem(s["name"], s)
@@ -308,7 +324,7 @@ class WallpaperApp(QMainWindow):
         card_audio = self.create_card(h_layout, "audio_frame")
         self.chk_silent = QCheckBox("silent_checkbox")
         self.chk_silent.clicked.connect(self.run_wallpaper)
-        self.slider_volume = QSlider(Qt.Orientation.Horizontal)
+        self.slider_volume = clickable_slider(Qt.Orientation.Horizontal)
         self.slider_volume.setRange(0, 100)
         self.slider_volume.setValue(15)
         self.slider_volume.sliderReleased.connect(self.run_wallpaper)
@@ -323,7 +339,7 @@ class WallpaperApp(QMainWindow):
         l.addWidget(self.chk_no_automute)
         l.addWidget(self.chk_no_proc)
         card_perf = self.create_card(h_layout, "perf_frame")
-        self.slider_fps = QSlider(Qt.Orientation.Horizontal)
+        self.slider_fps = clickable_slider(Qt.Orientation.Horizontal)
         self.slider_fps.setRange(10, 144)
         self.slider_fps.setValue(30)
         self.slider_fps.sliderReleased.connect(self.run_wallpaper)
@@ -459,9 +475,19 @@ class WallpaperApp(QMainWindow):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(self._("search_placeholder"))
         self.search_input.textChanged.connect(self.filter_wallpapers)
+        self.sorting_type = QComboBox()
+        self.sorting_type.addItems(["Name", "Subscription Date"])
+        self.sort_reversed_state = False
+        self.sorting_type.currentTextChanged.connect(self.on_sort_change)
+        self.btn_reverse_sorted = QPushButton("↑")
+        self.btn_reverse_sorted.setStyleSheet("background-color: None; font-size: 26px;")
+        self.btn_reverse_sorted.clicked.connect(self.reverse_sorted)
         search_layout.addWidget(self.search_input)
+        search_layout.addWidget(self.sorting_type)
+        search_layout.addWidget(self.btn_reverse_sorted)
         layout.addLayout(search_layout)
         self.list_wallpapers = QListWidget()
+        self.list_wallpapers.setMovement(QListWidget.Movement.Static)
         self.list_wallpapers.setObjectName("WallpaperGrid")
         self.list_wallpapers.setViewMode(QListWidget.ViewMode.IconMode)
         self.list_wallpapers.setResizeMode(QListWidget.ResizeMode.Adjust)
@@ -698,7 +724,7 @@ class WallpaperApp(QMainWindow):
             data = self.list_wallpapers.item(i).data(Qt.ItemDataRole.UserRole)
             if data: existing_ids.add(data["id"])
         new_count = 0
-        wallpapers.sort(key=lambda x: x["title"].lower())
+        self.sort_wallpapers(wallpapers)
         for w in wallpapers:
             if w["id"] in existing_ids: continue
             item = QListWidgetItem(w["title"])
@@ -734,12 +760,81 @@ class WallpaperApp(QMainWindow):
 
     def filter_wallpapers(self, text):
         query = text.lower()
+
+        if query:
+            self.watcher.timer.stop()
+
+        else:
+            self.watcher.timer.start()
+
         for i in range(self.list_wallpapers.count()):
             item = self.list_wallpapers.item(i)
             data = item.data(Qt.ItemDataRole.UserRole)
             title = item.text().lower()
             wp_id = str(data.get("id", "")).lower()
             item.setHidden(query not in title and query not in wp_id)
+    
+    def on_sort_change(self):
+        try:
+            # Save sorting type to config
+            self.config["sorting_type"] = self.sorting_type.currentText()
+            self.save_config()
+
+            if self.scan_logic()[0]:
+                wallpapers = self.scan_logic()[0]
+
+            if wallpapers:
+                self.thread = QThread()
+                self.worker = Worker(self.sort_wallpapers, wallpapers)
+                self.worker.moveToThread(self.thread)
+                self.thread.started.connect(self.worker.run)
+                self.worker.finished.connect(self.thread.quit)
+                self.worker.finished.connect(self.worker.deleteLater)
+                self.thread.finished.connect(self.worker.deleteLater)
+                self.watcher.library_changed.emit()
+                self.thread.start()
+
+        except FileNotFoundError:
+            return 0
+
+        except Exception as e:
+            print(f"Error of type {e}")
+            return 0
+
+
+    def sort_wallpapers(self, wallpapers):
+        try:
+
+            if self.sorting_type.currentText() == "Name":
+                if not self.sort_reversed_state:
+                    wallpapers.sort(key=lambda x: x["title"].lower())
+                else:
+                    wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
+
+            elif self.sorting_type.currentText() == "Subscription Date":
+                if not self.sort_reversed_state:
+                    # By default needs to be reversed to get the latest subscriptions
+                    wallpapers.sort(key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=True)
+                else:
+                    wallpapers.sort(key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=False)
+        except FileNotFoundError:
+            return 0
+
+        except Exception as e:
+            print(f"Error of type {e}")
+            return 0
+
+    def reverse_sorted(self):
+        if not self.sort_reversed_state:
+            self.sort_reversed_state = True
+            self.btn_reverse_sorted.setText("↓")
+        else:
+            self.btn_reverse_sorted.setText("↑")
+            self.sort_reversed_state = False
+
+        self.config["reversed"] = self.sort_reversed_state
+        self.save_config()
+        self.watcher.library_changed.emit()
 
     def on_property_selected(self):
         data = self.properties_combo.currentData()
@@ -1047,9 +1142,20 @@ class WallpaperApp(QMainWindow):
         self.screen_combo.setCurrentText(c.get("screen", ""))
         self.chk_silent.setChecked(c.get("silent", False))
         self.slider_volume.setValue(c.get("volume", 15))
+        self.chk_no_automute.setChecked(c.get("noautomute", False))
+        self.chk_no_proc.setChecked(c.get("no-audio-processing", False))
+        self.slider_fps.setValue(c.get("fps", 30))
+        self.chk_mouse.setChecked(c.get("disable-mouse", False))
+        self.chk_parallax.setChecked(c.get("disable-parallax", False))
+        self.chk_fs_pause.setChecked(c.get("no-fullscreen-pause", False))
         self.input_custom_args.setText(c.get("custom_args", ""))
         self.chk_windowed_mode.setChecked(c.get("windowed_mode", False))
         self.run_wallpaper()
+        # Library Settings
+        self.sorting_type.setCurrentText(self.config.get("sorting_type", "name"))
+        self.sort_reversed_state = self.config.get("reversed", False)
+        self.btn_reverse_sorted.setText("↑") if self.sort_reversed_state == False else self.btn_reverse_sorted.setText("↓")
+        self.watcher.library_changed.emit()
 
     def detect_screens(self):
         screens = []
@@ -1116,8 +1222,14 @@ class WallpaperApp(QMainWindow):
             "screen": self.screen_combo.currentText(),
             "silent": self.chk_silent.isChecked(),
             "volume": self.slider_volume.value(),
+            "noautomute": self.chk_no_automute.isChecked(),
+            "no-audio-processing": self.chk_no_proc.isChecked(),
+            "fps": self.slider_fps.value(),
+            "disable-mouse": self.chk_mouse.isChecked(),
+            "disable-parallax": self.chk_parallax.isChecked(),
+            "no-fullscreen-pause": self.chk_fs_pause.isChecked(),
             "custom_args": self.input_custom_args.text(),
-            "windowed_mode": self.chk_windowed_mode.isChecked()
+            "windowed_mode": self.chk_windowed_mode.isChecked(),
         }
         wallpaper_id = self.wp_id_input.text().strip()
         if wallpaper_id:
