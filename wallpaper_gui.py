@@ -706,27 +706,23 @@ class WallpaperApp(QMainWindow):
             data = self.list_wallpapers.item(i).data(Qt.ItemDataRole.UserRole)
             if data: existing_ids.add(data["id"])
         new_count = 0
+
         # Sort By Name
-
         if self.sort_wallpapers.currentText() == "Name":
-                    if not self.reversedState:
-                        wallpapers.sort(key=lambda x: x["title"].lower())
-
-                    else:
-                        wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
+            if not self.reversedState:
+                wallpapers.sort(key=lambda x: x["title"].lower())
+            else:
+                wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
 
         # Sort By Date of Subscription
-
         elif self.sort_wallpapers.currentText() == "Subscription Date":
             if not self.reversedState:
                 # By default needs to be reversed to get the latest subscriptions
                 wallpapers.sort(key=lambda x: os.path.getctime(x["path"]), reverse=True)
-
             else:
                 wallpapers.sort(
                     key=lambda x: os.path.getctime(x["path"]), reverse=False
                 )
-
 
         for w in wallpapers:
             if w["id"] in existing_ids: continue
@@ -771,14 +767,12 @@ class WallpaperApp(QMainWindow):
             item.setHidden(query not in title and query not in wp_id)
 
     def reverse_sort(self):
-
         if not self.reversedState:
             self.reversedState = True
             self.btn_reverse_sort.setText("↓")
         else:
             self.btn_reverse_sort.setText("↑")
             self.reversedState = False
-
 
     def on_property_selected(self):
         data = self.properties_combo.currentData()
