@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QPushButton, QLabel, QLineEdit, QCheckBox, QSlider, QComboBox,
                              QStackedWidget, QListWidget, QListWidgetItem, QSystemTrayIcon,
                              QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect,
-                             QStyledItemDelegate, QStyle, QFileDialog)
+                             QStyledItemDelegate, QStyle, QStyleOptionSlider, QFileDialog)
 from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant, QUrl
 from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter, QDesktopServices
 from process_manager import WallpaperProcessManager
@@ -213,6 +213,19 @@ class LibraryWatcher(QObject):
             self.observer.stop()
             self.observer.join()
 
+
+class clickable_slider(QSlider):
+
+    def mousePressEvent(self, signal):
+
+        if signal.button() == Qt.MouseButton.LeftButton:
+            offset = 5
+            value = QStyle.sliderValueFromPosition(self.minimum() - offset, self.maximum() + offset,
+                                                   signal.pos().x(), self.width())
+            self.setValue(value)
+
+        super().mousePressEvent(signal)
+
 class WallpaperApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -308,7 +321,7 @@ class WallpaperApp(QMainWindow):
         card_audio = self.create_card(h_layout, "audio_frame")
         self.chk_silent = QCheckBox("silent_checkbox")
         self.chk_silent.clicked.connect(self.run_wallpaper)
-        self.slider_volume = QSlider(Qt.Orientation.Horizontal)
+        self.slider_volume = clickable_slider(Qt.Orientation.Horizontal)
         self.slider_volume.setRange(0, 100)
         self.slider_volume.setValue(15)
         self.slider_volume.sliderReleased.connect(self.run_wallpaper)
@@ -323,7 +336,7 @@ class WallpaperApp(QMainWindow):
         l.addWidget(self.chk_no_automute)
         l.addWidget(self.chk_no_proc)
         card_perf = self.create_card(h_layout, "perf_frame")
-        self.slider_fps = QSlider(Qt.Orientation.Horizontal)
+        self.slider_fps = clickable_slider(Qt.Orientation.Horizontal)
         self.slider_fps.setRange(10, 144)
         self.slider_fps.setValue(30)
         self.slider_fps.sliderReleased.connect(self.run_wallpaper)
