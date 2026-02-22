@@ -241,6 +241,7 @@ class WallpaperApp(QMainWindow):
         self.apply_theme()
         self.apply_config_ui()
         self.setup_tray()
+        self.start_scan()
         self.screens = self.detect_screens()
         for s in self.screens:
             self.screen_combo.addItem(s["name"], s)
@@ -561,7 +562,6 @@ class WallpaperApp(QMainWindow):
 
     def switch_page(self, row):
         self.stack.setCurrentIndex(row)
-        self.start_scan()
 
     def change_lang(self, text):
         code = self.combo_lang.currentData()
