@@ -459,15 +459,15 @@ class WallpaperApp(QMainWindow):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(self._("search_placeholder"))
         self.search_input.textChanged.connect(self.filter_wallpapers)
-        self.sorting_options = QComboBox()
-        self.sorting_options.addItems(["Name", "Subscription Date"])
+        self.sorting_type = QComboBox()
+        self.sorting_type.addItems(["Name", "Subscription Date"])
         self.sort_reversed_state = False
-        self.sorting_options.currentTextChanged.connect(self.update_wallpapers)
+        self.sorting_type.currentTextChanged.connect(self.sort_wallpapers)
         self.btn_reverse_sorted = QPushButton("↑")
         self.btn_reverse_sorted.setStyleSheet("background-color: None; font-size: 26px;")
         self.btn_reverse_sorted.clicked.connect(self.reverse_sorted)
         search_layout.addWidget(self.search_input)
-        search_layout.addWidget(self.sorting_options)
+        search_layout.addWidget(self.sorting_type)
         search_layout.addWidget(self.btn_reverse_sorted)
         layout.addLayout(search_layout)
         self.list_wallpapers = QListWidget()
@@ -707,7 +707,6 @@ class WallpaperApp(QMainWindow):
             data = self.list_wallpapers.item(i).data(Qt.ItemDataRole.UserRole)
             if data: existing_ids.add(data["id"])
         new_count = 0
-
         self.sort_wallpapers(wallpapers)
 
         for w in wallpapers:
@@ -754,18 +753,24 @@ class WallpaperApp(QMainWindow):
 
     def sort_wallpapers(self, wallpapers):
         try:
-            # Sort By Name
-            if self.sorting_options.currentText() == "Name":
+            # if sorting type has changed via combo box signal we need to reassign wallpapers
+            if type(wallpapers) == str:
+                wallpapers = self.scan_logic()[0]
+
+            # Refresh library after sorting
+            if self.watcher:
+                self.watcher.library_changed.emit()
+
+            if self.sorting_type.currentText() == "Name":
                 if not self.sort_reversed_state:
-                    return wallpapers.sort(key=lambda x: x["title"].lower())
+                    wallpapers.sort(key=lambda x: x["title"].lower())
                 else:
                     return wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
 
-            # Sort By Date of Subscription
-            elif self.sorting_options.currentText() == "Subscription Date":
+            elif self.sorting_type.currentText() == "Subscription Date":
                 if not self.sort_reversed_state:
                     # By default needs to be reversed to get the latest subscriptions
-                    return wallpapers.sort(key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=True)
+                    wallpapers.sort(key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=True)
                 else:
                     return wallpapers.sort(
                         key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=False
@@ -778,16 +783,13 @@ class WallpaperApp(QMainWindow):
             return 0
 
     def reverse_sorted(self):
+        self.watcher.library_changed.emit()
         if not self.sort_reversed_state:
             self.sort_reversed_state = True
             self.btn_reverse_sorted.setText("↓")
         else:
             self.btn_reverse_sorted.setText("↑")
             self.sort_reversed_state = False
-
-    def update_wallpapers(self):
-        print("Sorting Changed")
-
 
     def on_property_selected(self):
         data = self.properties_combo.currentData()
