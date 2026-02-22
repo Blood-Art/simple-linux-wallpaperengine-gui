@@ -461,9 +461,9 @@ class WallpaperApp(QMainWindow):
         self.search_input.textChanged.connect(self.filter_wallpapers)
         self.sort_wallpapers = QComboBox()
         self.sort_wallpapers.addItems(["Name", "Subscription Date"])
-        self.reversedState = False
+        self.sort_reversed_state = False
         self.btn_reverse_sort = QPushButton("↑")
-        self.btn_reverse_sort.setStyleSheet("background-color: None; font-size: 20px;")
+        self.btn_reverse_sort.setStyleSheet("background-color: None; font-size: 25px;")
         self.btn_reverse_sort.clicked.connect(self.reverse_sort)
         search_layout.addWidget(self.search_input)
         search_layout.addWidget(self.sort_wallpapers)
@@ -707,22 +707,7 @@ class WallpaperApp(QMainWindow):
             if data: existing_ids.add(data["id"])
         new_count = 0
 
-        # Sort By Name
-        if self.sort_wallpapers.currentText() == "Name":
-            if not self.reversedState:
-                wallpapers.sort(key=lambda x: x["title"].lower())
-            else:
-                wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
-
-        # Sort By Date of Subscription
-        elif self.sort_wallpapers.currentText() == "Subscription Date":
-            if not self.reversedState:
-                # By default needs to be reversed to get the latest subscriptions
-                wallpapers.sort(key=lambda x: os.path.getctime(x["path"]), reverse=True)
-            else:
-                wallpapers.sort(
-                    key=lambda x: os.path.getctime(x["path"]), reverse=False
-                )
+        self.sorting_options(wallpapers)
 
         for w in wallpapers:
             if w["id"] in existing_ids: continue
@@ -766,13 +751,38 @@ class WallpaperApp(QMainWindow):
             wp_id = str(data.get("id", "")).lower()
             item.setHidden(query not in title and query not in wp_id)
 
+    def sorting_options(self, wallpapers):
+        try:
+            # Sort By Name
+            if self.sort_wallpapers.currentText() == "Name":
+                if not self.sort_reversed_state:
+                    return wallpapers.sort(key=lambda x: x["title"].lower())
+                else:
+                    return wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
+
+            # Sort By Date of Subscription
+            elif self.sort_wallpapers.currentText() == "Subscription Date":
+                if not self.sort_reversed_state:
+                    # By default needs to be reversed to get the latest subscriptions
+                    return wallpapers.sort(key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=True)
+                else:
+                    return wallpapers.sort(
+                        key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=False
+                    )
+        except FileNotFoundError:
+            return 0
+
+        except Exception as e:
+            print(f"Error of type {e}")
+            return 0
+
     def reverse_sort(self):
-        if not self.reversedState:
-            self.reversedState = True
+        if not self.sort_reversed_state:
+            self.sort_reversed_state = True
             self.btn_reverse_sort.setText("↓")
         else:
             self.btn_reverse_sort.setText("↑")
-            self.reversedState = False
+            self.sort_reversed_state = False
 
     def on_property_selected(self):
         data = self.properties_combo.currentData()
