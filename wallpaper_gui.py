@@ -462,7 +462,7 @@ class WallpaperApp(QMainWindow):
         self.sort_wallpapers = QComboBox()
         self.sort_wallpapers.addItems(["Name", "Subscription Date"])
         self.reversedState = False
-        self.btn_reverse_sort = QPushButton("")
+        self.btn_reverse_sort = QPushButton("↑")
         self.btn_reverse_sort.setStyleSheet("background-color: None; font-size: 20px;")
         self.btn_reverse_sort.clicked.connect(self.reverse_sort)
         search_layout.addWidget(self.search_input)
@@ -774,9 +774,9 @@ class WallpaperApp(QMainWindow):
 
         if not self.reversedState:
             self.reversedState = True
-            self.btn_reverse_sort.setText("")
+            self.btn_reverse_sort.setText("↓")
         else:
-            self.btn_reverse_sort.setText("")
+            self.btn_reverse_sort.setText("↑")
             self.reversedState = False
 
 
