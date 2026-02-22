@@ -780,8 +780,8 @@ class WallpaperApp(QMainWindow):
             self.config["sorting_type"] = self.sorting_type.currentText()
             self.save_config()
 
-            if self.scan_logic()[0]:
-                wallpapers = self.scan_logic()[0]
+            if self.list_wallpapers:
+                wallpapers = self.list_wallpapers
 
             if wallpapers:
                 self.thread = QThread()
@@ -789,7 +789,6 @@ class WallpaperApp(QMainWindow):
                 self.worker.moveToThread(self.thread)
                 self.thread.started.connect(self.worker.run)
                 self.worker.finished.connect(self.thread.quit)
-                self.worker.finished.connect(self.worker.deleteLater)
                 self.thread.finished.connect(self.worker.deleteLater)
                 self.watcher.library_changed.emit()
                 self.thread.start()
