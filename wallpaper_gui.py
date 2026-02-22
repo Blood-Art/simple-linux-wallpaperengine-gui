@@ -471,6 +471,7 @@ class WallpaperApp(QMainWindow):
         search_layout.addWidget(self.btn_reverse_sorted)
         layout.addLayout(search_layout)
         self.list_wallpapers = QListWidget()
+        self.list_wallpapers.setMovement(QListWidget.Movement.Static)
         self.list_wallpapers.setObjectName("WallpaperGrid")
         self.list_wallpapers.setViewMode(QListWidget.ViewMode.IconMode)
         self.list_wallpapers.setResizeMode(QListWidget.ResizeMode.Adjust)
