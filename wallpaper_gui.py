@@ -744,6 +744,13 @@ class WallpaperApp(QMainWindow):
 
     def filter_wallpapers(self, text):
         query = text.lower()
+
+        if query:
+            self.watcher.timer.stop()
+
+        else:
+            self.watcher.timer.start()
+
         for i in range(self.list_wallpapers.count()):
             item = self.list_wallpapers.item(i)
             data = item.data(Qt.ItemDataRole.UserRole)
