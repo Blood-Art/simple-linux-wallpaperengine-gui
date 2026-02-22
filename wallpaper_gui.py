@@ -476,7 +476,7 @@ class WallpaperApp(QMainWindow):
         self.sorting_type = QComboBox()
         self.sorting_type.addItems(["Name", "Subscription Date"])
         self.sort_reversed_state = False
-        self.sorting_type.currentTextChanged.connect(self.sort_wallpapers)
+        self.sorting_type.currentTextChanged.connect(self.on_sort_change)
         self.btn_reverse_sorted = QPushButton("↑")
         self.btn_reverse_sorted.setStyleSheet("background-color: None; font-size: 26px;")
         self.btn_reverse_sorted.clicked.connect(self.reverse_sorted)
@@ -772,18 +772,37 @@ class WallpaperApp(QMainWindow):
             title = item.text().lower()
             wp_id = str(data.get("id", "")).lower()
             item.setHidden(query not in title and query not in wp_id)
+    
+    def on_sort_change(self):
+        try:
+            # Save sorting type to config
+            self.config["sorting_type"] = self.sorting_type.currentText()
+            self.save_config()
+
+            if self.scan_logic()[0]:
+                wallpapers = self.scan_logic()[0]
+
+            if wallpapers:
+                self.thread = QThread()
+                self.worker = Worker(self.sort_wallpapers, wallpapers)
+                self.worker.moveToThread(self.thread)
+                self.thread.started.connect(self.worker.run)
+                self.worker.finished.connect(self.thread.quit)
+                self.worker.finished.connect(self.worker.deleteLater)
+                self.thread.finished.connect(self.worker.deleteLater)
+                self.watcher.library_changed.emit()
+                self.thread.start()
+
+        except FileNotFoundError:
+            return 0
+
+        except Exception as e:
+            print(f"Error of type {e}")
+            return 0
+
 
     def sort_wallpapers(self, wallpapers):
         try:
-            # if sorting type has changed via combo box signal
-            if type(wallpapers) == str:
-                wallpapers = self.scan_logic()[0]
-                self.config["sorting_type"] = self.sorting_type.currentText()
-                self.save_config()
-
-            # Refresh library after sorting
-            if self.watcher:
-                self.watcher.library_changed.emit()
 
             if self.sorting_type.currentText() == "Name":
                 if not self.sort_reversed_state:
@@ -807,7 +826,6 @@ class WallpaperApp(QMainWindow):
             return 0
 
     def reverse_sorted(self):
-        self.watcher.library_changed.emit()
         if not self.sort_reversed_state:
             self.sort_reversed_state = True
             self.btn_reverse_sorted.setText("↓")
@@ -817,6 +835,7 @@ class WallpaperApp(QMainWindow):
 
         self.config["reversed"] = self.sort_reversed_state
         self.save_config()
+        self.watcher.library_changed.emit()
 
     def on_property_selected(self):
         data = self.properties_combo.currentData()
@@ -1137,6 +1156,7 @@ class WallpaperApp(QMainWindow):
         self.sorting_type.setCurrentText(self.config.get("sorting_type", "name"))
         self.sort_reversed_state = self.config.get("reversed", False)
         self.btn_reverse_sorted.setText("↑") if self.sort_reversed_state == False else self.btn_reverse_sorted.setText("↓")
+        self.watcher.library_changed.emit()
 
     def detect_screens(self):
         screens = []
