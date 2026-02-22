@@ -242,6 +242,8 @@ class WallpaperApp(QMainWindow):
         self.apply_config_ui()
         self.setup_tray()
         self.start_scan()
+        self.stack.setCurrentIndex(1)
+        self.nav_bar.setCurrentRow(1)
         self.screens = self.detect_screens()
         for s in self.screens:
             self.screen_combo.addItem(s["name"], s)
@@ -723,7 +725,6 @@ class WallpaperApp(QMainWindow):
             if data: existing_ids.add(data["id"])
         new_count = 0
         self.sort_wallpapers(wallpapers)
-
         for w in wallpapers:
             if w["id"] in existing_ids: continue
             item = QListWidgetItem(w["title"])
@@ -806,18 +807,16 @@ class WallpaperApp(QMainWindow):
 
             if self.sorting_type.currentText() == "Name":
                 if not self.sort_reversed_state:
-                    return wallpapers.sort(key=lambda x: x["title"].lower())
+                    wallpapers.sort(key=lambda x: x["title"].lower())
                 else:
-                    return wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
+                    wallpapers.sort(key=lambda x: x["title"].lower(), reverse=True)
 
             elif self.sorting_type.currentText() == "Subscription Date":
                 if not self.sort_reversed_state:
                     # By default needs to be reversed to get the latest subscriptions
                     wallpapers.sort(key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=True)
                 else:
-                    return wallpapers.sort(
-                        key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=False
-                    )
+                    wallpapers.sort(key=lambda x: pathlib.Path(x["path"]).stat().st_ctime, reverse=False)
         except FileNotFoundError:
             return 0
 
