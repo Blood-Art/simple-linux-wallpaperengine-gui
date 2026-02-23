@@ -51,7 +51,7 @@ QCheckBox::indicator { width: 16px; height: 16px; border-radius: 4px; border: 1p
 QCheckBox::indicator:checked { background: #0A84FF; border-color: #0A84FF; }
 QSlider::groove:horizontal { border: 1px solid #3A3A3A; height: 4px; background: #3A3A3A; margin: 2px 0; border-radius: 2px; }
 QSlider::handle:horizontal { background: #FFFFFF; border: 1px solid #5c5c5c; width: 18px; height: 18px; margin: -8px 0; border-radius: 9px; }
-QListWidget#WallpaperGrid { background-color: transparent; border: none; outline: none; padding: 20px 20px 20px 100px; }
+QListWidget#WallpaperGrid { background-color: transparent; border: none; outline: none; padding: 20px; }
 QListWidget#WallpaperGrid::item { background-color: #2D2D2D; border: 1px solid #3A3A3A; border-radius: 12px; margin: 15px; color: #FFFFFF; padding: 5px; }
 QListWidget#WallpaperGrid::item:selected { background-color: #3A3A3A; border: 2px solid #0A84FF; color: #FFFFFF; }
 QListWidget#WallpaperGrid::item:hover { background-color: #353535; border: 1px solid #4A4A4A; }
@@ -283,10 +283,14 @@ class WallpaperApp(QMainWindow):
         self.nav_bar = QListWidget()
         self.nav_bar.setObjectName("Sidebar")
         self.nav_bar.setFlow(QListWidget.Flow.LeftToRight)
-        self.nav_bar.setFixedWidth(450)
+        self.nav_bar.setFixedWidth(420)
         self.nav_bar.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.addItems(["Control", "Library"])
+        for i in range(self.nav_bar.count()):
+            item = self.nav_bar.item(i)
+            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            item.setSizeHint(QSize(200, 32))
         self.nav_bar.currentRowChanged.connect(self.switch_page)
 
         nav_layout.addStretch()
