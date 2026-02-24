@@ -37,7 +37,7 @@
     "status_error_launch_command": "Status: Error! Failed to launch command: ",
     "status_all_stopped": "Status: All wallpaper engine processes stopped.",
     "status_no_processes_found": "Status: No processes found or pkill failed.",
-    "scan_local_wallpapers_button": "Scan Local Wallpapers",
+    "scan_local_wallpapers_button": "Scan Wallpapers",
     "found_wallpapers_frame": "Found Wallpapers",
     "treeview_title_column": "Title",
     "treeview_id_column": "ID",

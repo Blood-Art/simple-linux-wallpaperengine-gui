@@ -36,7 +36,7 @@
     "status_error_launch_command": "Status: Fehler! Befehl konnte nicht gestartet werden: ",
     "status_all_stopped": "Status: Alle Hintergrund-Engine-Prozesse gestoppt.",
     "status_no_processes_found": "Status: Keine Prozesse gefunden oder pkill fehlgeschlagen.",
-    "scan_local_wallpapers_button": "Lokale Hintergründe scannen",
+    "scan_local_wallpapers_button": "Hintergrundbilder scannen",
     "found_wallpapers_frame": "Gefundene Hintergründe",
     "treeview_title_column": "Titel",
     "treeview_id_column": "ID",

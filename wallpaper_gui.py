@@ -13,13 +13,13 @@ import argparse
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+from PyQt6.QtWidgets import (QApplication, QBoxLayout, QMainWindow, QSpacerItem, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QLineEdit, QCheckBox, QSlider, QComboBox,
                              QStackedWidget, QListWidget, QListWidgetItem, QSystemTrayIcon,
                              QMenu, QFrame, QSizePolicy, QGraphicsDropShadowEffect,
                              QStyledItemDelegate, QStyle, QStyleOptionSlider, QFileDialog)
 from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal, QObject, QTimer, QRect, QPropertyAnimation, QEasingCurve, QVariant, QUrl
-from PyQt6.QtGui import QIcon, QPixmap, QImage, QAction, QColor, QPainter, QDesktopServices
+from PyQt6.QtGui import QFont, QIcon, QPixmap, QImage, QAction, QColor, QPainter, QDesktopServices
 from process_manager import WallpaperProcessManager
 
 CONFIG_FILE = pathlib.Path(os.getenv("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))) / "linux-wallpaperengine-gui" / "wpe_gui_config.json"
@@ -35,28 +35,28 @@ QListWidget#Sidebar::item:selected { background-color: #3A3A3A; color: #FFFFFF; 
 QListWidget#Sidebar::item:hover:!selected { background-color: #2F2F2F; color: #FFFFFF; }
 QFrame.Card { background-color: #2D2D2D; border: 1px solid #3A3A3A; border-radius: 10px; }
 QLabel.CardTitle { font-weight: 600; font-size: 15px; color: #FFFFFF; margin-bottom: 8px; }
-QLineEdit, QComboBox { background-color: #1E1E1E; border: 1px solid #3A3A3A; border-radius: 6px; padding: 4px 8px; color: #FFFFFF; selection-background-color: #0A84FF; min-height: 22px; }
+QLineEdit, QComboBox { background-color: #000000; border: 1px solid #3A3A3A; border-radius: 6px; padding: 4px 8px; color: #FFFFFF; selection-background-color: #0A84FF; min-height: 22px; }
 QLineEdit:focus, QComboBox:focus { border: 1px solid #0A84FF; }
 QComboBox::drop-down { border: none; }
 QComboBox QAbstractItemView { background-color: #1E1E1E; border: 1px solid #3A3A3A; selection-background-color: #0A84FF; selection-color: #FFFFFF; color: #FFFFFF; outline: none; }
-QPushButton { background-color: #0A84FF; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 500; font-size: 13px; min-height: 20px; }
-QPushButton:hover { background-color: #007AFF; }
+QPushButton { background-color: #0A84FF; color: white; border: none; border-radius: 3px; padding: 6px 16px; font-weight: 650; font-size: 13px; min-height: 20px; }
+QPushButton:hover { background-color: #03447b; }
 QPushButton:pressed { background-color: #0062CC; }
 QPushButton#SecondaryButton { background-color: #3A3A3A; border: 1px solid #3A3A3A; color: #FFFFFF; }
-QPushButton#SecondaryButton:hover { background-color: #454545; }
+QPushButton#SecondaryButton:hover { background-color: #222222; }
 QPushButton#DangerButton { background-color: #FF453A; }
 QPushButton#DangerButton:hover { background-color: #D0342C; }
 QCheckBox { spacing: 8px; color: #FFFFFF; }
 QCheckBox::indicator { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #666666; background: #2D2D2D; }
 QCheckBox::indicator:checked { background: #0A84FF; border-color: #0A84FF; }
-QSlider::groove:horizontal { border: 1px solid #3A3A3A; height: 4px; background: #3A3A3A; margin: 2px 0; border-radius: 2px; }
+QSlider::groove:horizontal { border: 1px solid #3A3A3A; height: 5px; background: #3f7fcf; margin: 2px 0; border-radius: 2px; }
 QSlider::handle:horizontal { background: #FFFFFF; border: 1px solid #5c5c5c; width: 18px; height: 18px; margin: -8px 0; border-radius: 9px; }
-QListWidget#WallpaperGrid { background-color: transparent; border: none; outline: none; padding: 20px; }
-QListWidget#WallpaperGrid::item { background-color: #2D2D2D; border: 1px solid #3A3A3A; border-radius: 12px; margin: 15px; color: #FFFFFF; padding: 5px; }
+QListWidget#WallpaperGrid { background-color: transparent; border: none; outline: none; padding: 0px 0px 0px 0px; }
+QListWidget#WallpaperGrid::item { background-color: #111111; border: 1px solid #3A3A3A; border-radius: 3px; margin: 15px; color: #FFFFFF; padding: 5px; }
 QListWidget#WallpaperGrid::item:selected { background-color: #3A3A3A; border: 2px solid #0A84FF; color: #FFFFFF; }
-QListWidget#WallpaperGrid::item:hover { background-color: #353535; border: 1px solid #4A4A4A; }
+QListWidget#WallpaperGrid::item:hover { background-color: #373737; border: 1px solid #4A4A4A; }
 QScrollBar:vertical { border: none; background: transparent; width: 10px; margin: 0px; }
-QScrollBar::handle:vertical { background: rgba(255, 255, 255, 0.1); min-height: 40px; border-radius: 5px; margin: 2px; }
+QScrollBar::handle:vertical { background: rgba(60, 150, 245, 0.75); min-height: 180px; border-radius: 5px; margin: 2px; }
 QScrollBar::handle:vertical:hover { background: rgba(255, 255, 255, 0.2); }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; background: none; }
 QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical { background: none; }
@@ -102,7 +102,7 @@ class WallpaperDelegate(QStyledItemDelegate):
         self.current_scales = {}
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_animations)
-        self.timer.start(16)
+        self.timer.start(10)
 
     def update_animations(self):
         changed = False
@@ -129,7 +129,7 @@ class WallpaperDelegate(QStyledItemDelegate):
 
 
         is_hovered = option.state & QStyle.StateFlag.State_MouseOver
-        self.scales[idx_id] = 1.08 if is_hovered else 1.0
+        self.scales[idx_id] = 1.15 if is_hovered else 1.0
 
 
         scale = self.current_scales.get(idx_id, 1.0)
@@ -141,10 +141,10 @@ class WallpaperDelegate(QStyledItemDelegate):
 
 
             if is_hovered:
-                shadow_color = QColor(0, 0, 0, 60)
+                shadow_color = QColor(0, 0, 0, 0)
                 painter.setPen(Qt.PenStyle.NoPen)
                 painter.setBrush(shadow_color)
-                painter.drawRoundedRect(option.rect.adjusted(2, 2, 2, 2), 12, 12)
+                painter.drawRoundedRect(option.rect.adjusted(2, 2, 2, 2), 5, 5)
 
         super().paint(painter, option, index)
         painter.restore()
@@ -214,7 +214,7 @@ class LibraryWatcher(QObject):
             self.observer.join()
 
 
-class clickable_slider(QSlider):
+class ClickableSlider(QSlider):
 
     def mousePressEvent(self, signal):
 
@@ -236,7 +236,7 @@ class WallpaperApp(QMainWindow):
         self.i18n.load(self.config.get("current_language", "en"))
         self._ = self.i18n.get
         self.setWindowTitle(f"{self._('app_title')} [build: props-ui-1]")
-        self.setFixedSize(1050, 900)
+        self.setFixedSize(900, 900)
         self.setup_ui()
         self.apply_theme()
         self.apply_config_ui()
@@ -283,19 +283,16 @@ class WallpaperApp(QMainWindow):
         self.nav_bar = QListWidget()
         self.nav_bar.setObjectName("Sidebar")
         self.nav_bar.setFlow(QListWidget.Flow.LeftToRight)
-        self.nav_bar.setFixedWidth(420)
+        self.nav_bar.setFixedWidth(600)
         self.nav_bar.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.addItems(["Control", "Library"])
-        for i in range(self.nav_bar.count()):
-            item = self.nav_bar.item(i)
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            item.setSizeHint(QSize(200, 32))
         self.nav_bar.currentRowChanged.connect(self.switch_page)
 
         nav_layout.addStretch()
         nav_layout.addWidget(self.nav_bar)
         nav_layout.addStretch()
+        nav_layout.addSpacing(250)
 
         main_layout.addWidget(self.nav_container)
 
@@ -328,7 +325,7 @@ class WallpaperApp(QMainWindow):
         card_audio = self.create_card(h_layout, "audio_frame")
         self.chk_silent = QCheckBox("silent_checkbox")
         self.chk_silent.clicked.connect(self.run_wallpaper)
-        self.slider_volume = clickable_slider(Qt.Orientation.Horizontal)
+        self.slider_volume = ClickableSlider(Qt.Orientation.Horizontal)
         self.slider_volume.setRange(0, 100)
         self.slider_volume.setValue(15)
         self.slider_volume.sliderReleased.connect(self.run_wallpaper)
@@ -343,7 +340,7 @@ class WallpaperApp(QMainWindow):
         l.addWidget(self.chk_no_automute)
         l.addWidget(self.chk_no_proc)
         card_perf = self.create_card(h_layout, "perf_frame")
-        self.slider_fps = clickable_slider(Qt.Orientation.Horizontal)
+        self.slider_fps = ClickableSlider(Qt.Orientation.Horizontal)
         self.slider_fps.setRange(10, 144)
         self.slider_fps.setValue(30)
         self.slider_fps.sliderReleased.connect(self.run_wallpaper)
@@ -453,57 +450,76 @@ class WallpaperApp(QMainWindow):
 
     def setup_library_page(self):
         layout = QVBoxLayout(self.page_library)
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(20)
-
+        layout.setContentsMargins(12, 24, 0, 0)
+        layout.setSpacing(0)
+        push_buttons_layout = QHBoxLayout()
+        push_buttons_layout.setContentsMargins(15, 0, 0, 0)
+        push_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         header = QHBoxLayout()
         self.btn_scan = QPushButton("scan_local_wallpapers_button")
         self.btn_scan.clicked.connect(self.start_scan)
-        self.btn_scan.setMinimumHeight(36)
+        self.btn_scan.setFixedSize(160, 200)
         self.btn_scan.setCursor(Qt.CursorShape.PointingHandCursor)
-        header.addWidget(self.btn_scan)
-        self.btn_select_folder = QPushButton("select_folder_button")
-        self.btn_select_folder.clicked.connect(self.manual_scan)
-        self.btn_select_folder.setMinimumHeight(36)
-        self.btn_select_folder.setObjectName("SecondaryButton")
-        self.btn_select_folder.setCursor(Qt.CursorShape.PointingHandCursor)
-        header.addWidget(self.btn_select_folder)
+        push_buttons_layout.addWidget(self.btn_scan)
+        push_buttons_layout.addSpacing(25)
         self.btn_set_library = QPushButton("set_wallpaper_button")
         self.btn_set_library.clicked.connect(self.run_wallpaper)
-        self.btn_set_library.setMinimumHeight(36)
+        self.btn_set_library.setFixedSize(160, 200)
         self.btn_set_library.setObjectName("PrimaryButton")
         self.btn_set_library.setCursor(Qt.CursorShape.PointingHandCursor)
-        header.addWidget(self.btn_set_library)
+        push_buttons_layout.addWidget(self.btn_set_library)
+        self.btn_select_folder = QPushButton("select_folder_button")
+        self.btn_select_folder.clicked.connect(self.manual_scan)
+        self.btn_select_folder.setFixedSize(130, 200)
+        self.btn_select_folder.setObjectName("SecondaryButton")
+        self.btn_select_folder.setCursor(Qt.CursorShape.PointingHandCursor)
+        push_buttons_layout.addSpacing(255)
+        push_buttons_layout.addWidget(self.btn_select_folder)
+        layout.addLayout(push_buttons_layout)
         layout.addLayout(header)
-        search_layout = QHBoxLayout()
+        
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(self._("search_placeholder"))
         self.search_input.textChanged.connect(self.filter_wallpapers)
+        self.search_input.setFixedWidth(350)
         self.sorting_type = QComboBox()
         self.sorting_type.addItems(["Name", "Subscription Date"])
+        self.sorting_type.setFixedWidth(150)
+        self.sorting_type.setStyleSheet("text-align: left;")
         self.sort_reversed_state = False
         self.sorting_type.currentTextChanged.connect(self.on_sort_change)
         self.btn_reverse_sorted = QPushButton("↑")
-        self.btn_reverse_sorted.setStyleSheet("background-color: None; font-size: 26px;")
+        self.btn_reverse_sorted.setFixedSize(50, 50)
+        self.btn_reverse_sorted.setStyleSheet("background-color: None; font-size: 22px;")
         self.btn_reverse_sorted.clicked.connect(self.reverse_sorted)
+        search_layout = QHBoxLayout()
+        search_layout.setSpacing(0)
+        search_layout.setContentsMargins(13,10,0,0)
         search_layout.addWidget(self.search_input)
-        search_layout.addWidget(self.sorting_type)
+        search_layout.addSpacing(183)
         search_layout.addWidget(self.btn_reverse_sorted)
+        search_layout.addWidget(self.sorting_type)
+        search_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addLayout(search_layout)
+
         self.list_wallpapers = QListWidget()
         self.list_wallpapers.setMovement(QListWidget.Movement.Static)
         self.list_wallpapers.setObjectName("WallpaperGrid")
         self.list_wallpapers.setViewMode(QListWidget.ViewMode.IconMode)
         self.list_wallpapers.setResizeMode(QListWidget.ResizeMode.Adjust)
-        self.list_wallpapers.setGridSize(QSize(250, 200))
-        self.list_wallpapers.setSpacing(10)
+        self.list_wallpapers.setGridSize(QSize(190, 250))
+        self.list_wallpapers.setSpacing(100)
         self.list_wallpapers.setWordWrap(True)
-        self.list_wallpapers.setIconSize(QSize(200, 140))
+        self.list_wallpapers.setIconSize(QSize(150, 170))
         self.list_wallpapers.setItemDelegate(WallpaperDelegate(self.list_wallpapers))
         self.list_wallpapers.setMouseTracking(True)
         self.list_wallpapers.itemClicked.connect(self.on_wallpaper_selected)
         self.list_wallpapers.itemDoubleClicked.connect(self.run_wallpaper)
-        layout.addWidget(self.list_wallpapers)
+        self.list_wallpapers.setItemAlignment(Qt.AlignmentFlag.AlignLeft)
+        wallpapers_layout = QVBoxLayout()
+        wallpapers_layout.addWidget(self.list_wallpapers)
+        wallpapers_layout.setContentsMargins(0,0,0,0)
+        layout.addLayout(wallpapers_layout)
 
     def create_label(self, text_key):
         lbl = QLabel(self._(text_key))
@@ -732,18 +748,23 @@ class WallpaperApp(QMainWindow):
         for w in wallpapers:
             if w["id"] in existing_ids: continue
             item = QListWidgetItem(w["title"])
+            item.setSizeHint(QSize(200, 240))
+            item_font = QFont()
+            item_font.setPointSize(10)
+            item_font.setWeight(700)
+            item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter)
+            item.setFont(item_font)
             item.setData(Qt.ItemDataRole.UserRole, w)
-
 
             if w.get("preview"):
                 path = os.path.join(w["path"], w["preview"])
                 if os.path.isfile(path):
                     pixmap = QPixmap(path)
 
-                    icon_pixmap = pixmap.scaled(200, 140, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
+                    icon_pixmap = pixmap.scaled(200, 200, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
 
 
-                    rect = QRect(0, 0, 200, 140)
+                    rect = QRect(0, 0, 200, 200)
                     rect.moveCenter(icon_pixmap.rect().center())
                     icon_pixmap = icon_pixmap.copy(rect)
 

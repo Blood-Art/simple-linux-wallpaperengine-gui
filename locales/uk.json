@@ -36,7 +36,7 @@
     "status_error_launch_command": "Статус: Помилка! Не вдалося запустити команду: ",
     "status_all_stopped": "Статус: Всі процеси фонового двигуна зупинено.",
     "status_no_processes_found": "Статус: Процеси не знайдено або pkill не вдалося виконати.",
-    "scan_local_wallpapers_button": "Сканувати локальні шпалери",
+    "scan_local_wallpapers_button": "сканувати шпалери",
     "found_wallpapers_frame": "Знайдені шпалери",
     "treeview_title_column": "Назва",
     "treeview_id_column": "ID",
