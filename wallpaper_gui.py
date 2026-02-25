@@ -290,7 +290,7 @@ class WallpaperApp(QMainWindow):
         for i in range(self.nav_bar.count()):
             item = self.nav_bar.item(i)
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            item.setSizeHint(QSize(200, 32))
+            item.setSizeHint(QSize(150, 32))
 
         self.nav_bar.currentRowChanged.connect(self.switch_page)
 
@@ -756,7 +756,7 @@ class WallpaperApp(QMainWindow):
             item.setSizeHint(QSize(200, 240))
             item_font = QFont()
             item_font.setPointSize(10)
-            item_font.setWeight(700)
+            item_font.setWeight(500)
             item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignCenter)
             item.setFont(item_font)
             item.setData(Qt.ItemDataRole.UserRole, w)
