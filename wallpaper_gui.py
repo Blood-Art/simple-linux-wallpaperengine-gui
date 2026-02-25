@@ -287,6 +287,11 @@ class WallpaperApp(QMainWindow):
         self.nav_bar.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.nav_bar.addItems(["Control", "Library"])
+        for i in range(self.nav_bar.count()):
+            item = self.nav_bar.item(i)
+            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            item.setSizeHint(QSize(200, 32))
+
         self.nav_bar.currentRowChanged.connect(self.switch_page)
 
         nav_layout.addStretch()
