@@ -36,7 +36,7 @@
     "status_error_launch_command": "Statut: Erreur! Échec du lancement de la commande: ",
     "status_all_stopped": "Statut: Tous les processus du moteur de fond d'écran arrêtés.",
     "status_no_processes_found": "Statut: Aucun processus trouvé ou pkill a échoué.",
-    "scan_local_wallpapers_button": "Scanner les fonds d'écran locaux",
+    "scan_local_wallpapers_button": "Scanner les fonds d'écran",
     "found_wallpapers_frame": "Fonds d'écran trouvés",
     "treeview_title_column": "Titre",
     "treeview_id_column": "ID",

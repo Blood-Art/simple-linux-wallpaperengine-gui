@@ -36,7 +36,7 @@
     "status_error_launch_command": "Estado: ¡Error! No se pudo iniciar el comando: ",
     "status_all_stopped": "Estado: Todos los procesos del motor de fondos detenidos.",
     "status_no_processes_found": "Estado: No se encontraron procesos o pkill falló.",
-    "scan_local_wallpapers_button": "Escanear fondos locales",
+    "scan_local_wallpapers_button": "Escanear fondos",
     "found_wallpapers_frame": "Fondos encontrados",
     "treeview_title_column": "Título",
     "treeview_id_column": "ID",

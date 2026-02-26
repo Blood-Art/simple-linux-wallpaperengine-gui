@@ -36,7 +36,7 @@
     "status_error_launch_command": "Статус: Ошибка! Не удалось запустить команду: ",
     "status_all_stopped": "Статус: Все процессы Wallpaper Engine остановлены.",
     "status_no_processes_found": "Статус: Процессы не найдены или pkill не удалось выполнить.",
-    "scan_local_wallpapers_button": "Сканировать локальные обои",
+    "scan_local_wallpapers_button": "Сканировать обои",
     "found_wallpapers_frame": "Найденные обои",
     "treeview_title_column": "Название",
     "treeview_id_column": "ID",
